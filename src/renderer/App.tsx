@@ -1,50 +1,39 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
+import { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { MemoryRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-
-function Hello() {
-  return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="folded hands">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
-  );
-}
+import '@fontsource/inter';
+import Login from './pages/Login';
+import Home from './pages/Home';
 
 export default function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
-  );
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsAuthenticated(!!user);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    if (isAuthenticated === null) {
+        return <div>Загрузка...</div>;
+    }
+
+    return (
+        <Router>
+            <Routes>
+                <Route 
+                    path="/" 
+                    element={isAuthenticated ? <Navigate to="/chat" /> : <Login />} 
+                />
+                <Route 
+                    path="/chat" 
+                    element={isAuthenticated ? <Home /> : <Navigate to="/" />} 
+                />
+            </Routes>
+        </Router>
+    );
 }
