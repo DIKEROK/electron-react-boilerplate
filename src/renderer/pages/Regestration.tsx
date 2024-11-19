@@ -29,16 +29,12 @@ function Registration() {
         }
 
         try {
-            // Создаем пользователя
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
-            // Обновляем профиль пользователя
             await updateProfile(user, {
                 displayName: `${name} ${surname}`
             });
 
-            // Сохраняем дополнительные данные в Firestore
             await setDoc(doc(db, "users", user.uid), {
                 name,
                 surname,
