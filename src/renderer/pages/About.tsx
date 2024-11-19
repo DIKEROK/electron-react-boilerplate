@@ -18,6 +18,7 @@ const TextColor = '#3C007D'
 function About() {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDay, setCurrentDay] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -56,9 +57,9 @@ function About() {
                     paddingRight: '50px',
                     position: 'relative'
                 }}>
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', flex: 1}}>
+                    <Box onClick={() => navigate('/')} sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', flex: 1, cursor:'pointer'}}>
                         <img src={logo} alt="logo" style={{width: '30px', height: '30px', marginRight: '-3px'}} />
-                        <Typography level="h2" sx={{fontFamily: "Jockey One", letterSpacing: '2px', fontSize: '34px', color: TextColor}}>STUDYTALK</Typography>
+                        <Typography level="h2" sx={{fontFamily: "Jockey One", letterSpacing: '2px', fontSize: '34px', color: TextColor}} >STUDYTALK</Typography>
                     </Box>
                     <Box sx={{
                         position: 'absolute',
