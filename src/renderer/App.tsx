@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Regestration from './pages/Regestration';
 import About from './pages/About';
 import Background from './components/Background';
+import News from './pages/News';
 
 // Создаем отдельный компонент для роутинга
 function AppRoutes() {
@@ -33,11 +34,15 @@ function AppRoutes() {
             <Routes location={location} key={location.pathname}>
                 <Route 
                     path="/" 
-                    element={isAuthenticated ? <Navigate to="/chat" /> : <Login />} 
+                    element={isAuthenticated ? <Navigate to="/news" /> : <Login />} 
+                />
+                <Route 
+                    path="/news"
+                    element={isAuthenticated ? <News /> : <Navigate to="/" />}
                 />
                 <Route 
                     path="/registration" 
-                    element={isAuthenticated ? <Navigate to="/chat" /> : <Regestration />} 
+                    element={<Regestration />}
                 />
                 <Route 
                     path="/about"

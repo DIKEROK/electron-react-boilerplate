@@ -2,6 +2,7 @@ import { Box, Button, Input, Typography } from '@mui/joy';
 import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { app } from '../firebase';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
@@ -67,7 +68,7 @@ function Registration() {
     };
 
     return (
-        <Box>
+        <motion.div initial={{opacity: 0, scale: 0.8}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.8}} transition={{duration: 0.6, type: "spring", ease: "linear"}}>
             <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -312,7 +313,7 @@ function Registration() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '20px', color: TextColor}}>Есть аккаунт?</Typography>
                     <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}} onClick={() => navigate('/')}>На главную</Button>
             </Box>
-        </Box>
+        </motion.div>
     )
 }
 
