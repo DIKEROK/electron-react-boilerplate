@@ -177,7 +177,7 @@ function Login() {
                 </Box>
             </Box>
             
-            <Divider sx={{width: '100%', marginTop: '100px', color: TextColor, "--Divider-lineColor": TextColor}}><KeyboardArrowDownRoundedIcon /></Divider>
+            <Divider sx={{width: '100%', marginTop: '100px', color: TextColor, "--Divider-lineColor": TextColor }}><KeyboardArrowDownRoundedIcon /></Divider>
 
             <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexDirection: 'column'}}>
