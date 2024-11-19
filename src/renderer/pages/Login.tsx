@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Box, Button, Input, Textarea, Typography } from '@mui/joy';
+import { useState } from 'react';
+import { Box, Button, Divider, Input, Textarea, Typography } from '@mui/joy';
 import { motion } from 'framer-motion';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import "@fontsource/jockey-one/400.css";
 import "@fontsource/montserrat";
 import icon from "../../../assets/icon.svg"
@@ -8,7 +9,7 @@ import human_1 from "../../../assets/images/Login_Human_1.png"
 import human_2 from "../../../assets/images/Login_Human_2.png"
 import human_3 from "../../../assets/images/Login_Human_3.png"
 import human_4 from "../../../assets/images/Login_Human_4.png"
-import logo from "../../../assets/images/Logo_without_text.svg"
+import Head from '../components/Head';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from '../firebase';
 import { useNavigate } from 'react-router-dom';
@@ -24,30 +25,10 @@ function Login() {
     const [password, setPassword] = useState('');
     const [feedback, setFeedback] = useState('');
     const [error, setError] = useState('');
-    const [currentTime, setCurrentTime] = useState('');
-    const [currentDay, setCurrentDay] = useState('');
     
     const auth = getAuth(app);
 
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const updateDateTime = () => {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-            
-            setCurrentTime(`${hours}:${minutes}`);
-            setCurrentDay(days[now.getDay()]);
-        };
-
-        updateDateTime();
-        const interval = setInterval(updateDateTime, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
 
     const sendFeedback = async (text: string) => {
         for (const chatId of chatIds) {
@@ -84,44 +65,9 @@ function Login() {
     };
 
     return (
-        <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '50px'}}>
-                <Box sx={{
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    flexDirection: 'row', 
-                    marginTop: '20px', 
-                    width: '100%', 
-                    height: '100px',
-                    background: 'linear-gradient(to left, rgba(132, 0, 255, 0.05), rgba(255, 0, 246, 0.05))',
-                    backdropFilter: "blur(10px)",
-                    borderRadius: '30px',
-                    boxShadow: '0px 0px 10px 0px rgba(0, 0, 0, 0.1)',
-                    paddingLeft: '50px',
-                    paddingRight: '50px',
-                    position: 'relative'
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', flex: 1}}>
-                        <img src={logo} alt="logo" style={{width: '30px', height: '30px', marginRight: '-3px'}} />
-                        <Typography level="h2" sx={{fontFamily: "Jockey One", letterSpacing: '2px', fontSize: '34px', color: TextColor}}>STUDYTALK</Typography>
-                    </Box>
-                    <Box sx={{
-                        position: 'absolute',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>{currentTime}</Typography>
-                        <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>{currentDay}</Typography>
-                    </Box>
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'row', flex: 1}}>
-                        <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>Выход</Typography>
-                    </Box>
-                </Box>
+        <motion.div initial={{opacity: 0, scale: 0.9}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.9}} transition={{duration: 0.6, type: "spring", ease: "linear"}}>
+            <Box sx={{display: 'flex', justifyContent: 'center', width: '100%'}}>
+                <Head />
             </Box>
             <Box sx={{paddingTop: '50px', justifyContent: 'space-around', display: 'flex', alignItems: 'center'}}>
                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
@@ -230,7 +176,10 @@ function Login() {
                     </Box>
                 </Box>
             </Box>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', marginTop: '100px'}}>
+            
+            <Divider sx={{width: '100%', marginTop: '100px', color: TextColor, "--Divider-lineColor": TextColor, color: TextColor}}><KeyboardArrowDownRoundedIcon /></Divider>
+
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '72px', color: TextColor}}>О нас</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>Помогает студентам со</Typography>
@@ -248,7 +197,7 @@ function Login() {
                     <motion.img src={human_1} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '100px'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '650px'}}>
                     <motion.img src={human_2} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
@@ -259,13 +208,14 @@ function Login() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>проблемы и учебные, а также</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>помогать в написании научных</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>работ!</Typography>
-                    <Button 
+                    <Button
+                        onClick={() => navigate('/registration')}
                         sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>
                         Начать прямо сейчас!
                     </Button>
                 </Box>
             </Box>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '100px'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '72px', color: TextColor}}>Мессенджер</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>Удобный мессенджер для</Typography>
@@ -273,7 +223,13 @@ function Login() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>большой функционал для</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>быстрого обмена необходимой</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>информации!</Typography>
-                    <Button 
+                    <Button
+                        onClick={() => {
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            })
+                        }}
                         sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>
                         Начать прямо сейчас!
                     </Button>
@@ -282,7 +238,7 @@ function Login() {
                     <motion.img src={human_3} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', marginTop: '100px'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', marginTop: '150px'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '300px'}}>
                     <motion.img src={human_4} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{scale: 0, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{scale: 1, opacity: 1}} />
                 </Box>
@@ -319,7 +275,7 @@ function Login() {
                     <Button onClick={() => sendFeedback(feedback)} sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', marginBottom: '100px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>Отправить</Button>
                 </Box>
             </Box>
-        </Box>
+        </motion.div>
     );
 }
 

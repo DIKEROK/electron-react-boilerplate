@@ -107,6 +107,7 @@
     "@fontsource/inter": "^5.1.0",
     "@fontsource/jockey-one": "^5.1.0",
     "@fontsource/montserrat": "^5.1.0",
+    "@mui/icons-material": "^6.1.7",
     "@mui/joy": "^5.0.0-beta.48",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
