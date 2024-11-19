@@ -172,12 +172,12 @@ function Login() {
                     )}
                     <Box sx={{display: 'flex', alignItems: 'baseline'}}>
                         <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '20px', color: TextColor}}>Нет аккаунта?</Typography>
-                        <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}} onClick={() => navigate('/regestration')}>Зарегистрироваться</Button>
+                        <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}} onClick={() => navigate('/registration')}>Зарегистрироваться</Button>
                     </Box>
                 </Box>
             </Box>
             
-            <Divider sx={{width: '100%', marginTop: '100px', color: TextColor, "--Divider-lineColor": TextColor, color: TextColor}}><KeyboardArrowDownRoundedIcon /></Divider>
+            <Divider sx={{width: '100%', marginTop: '100px', color: TextColor, "--Divider-lineColor": TextColor}}><KeyboardArrowDownRoundedIcon /></Divider>
 
             <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexDirection: 'column'}}>

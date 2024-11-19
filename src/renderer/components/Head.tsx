@@ -34,10 +34,11 @@ function Head() {
             alignItems: 'center', 
             justifyContent: 'center', 
             flexDirection: 'row', 
-            marginTop: '20px', 
+            marginTop: '20px',  
             width: '100%', 
             height: '100px',
-            background: 'linear-gradient(to left, rgba(132, 0, 255, 0.05), rgba(255, 0, 246, 0.05))',
+            // background: 'linear-gradient(to left, rgba(132, 0, 255, 0.05), rgba(255, 0, 246, 0.05))',
+            background: 'linear-gradient(to left, rgba(50, 25, 120, 0.05), rgba(120, 0, 150, 0.05))',
             backdropFilter: "blur(10px)",
             borderRadius: '30px',
             boxShadow: '0px 0px 10px 0px rgba(0, 0, 0, 0.1)',
@@ -45,10 +46,10 @@ function Head() {
             paddingRight: '50px',
             position: 'relative'
         }}>
-            <Box onClick={() => navigate('/')} sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', flex: 1, cursor:'pointer'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', flex: 1}}>
                 <img src={logo} alt="logo" style={{width: '30px', height: '30px', marginRight: '-3px'}} />
-                <Typography level="h2" sx={{fontFamily: "Jockey One", letterSpacing: '2px', fontSize: '34px', color: TextColor}} >STUDYTALK</Typography>
-            </Box>
+                <Typography level="h2" onClick={() => navigate('/')} sx={{fontFamily: "Jockey One", letterSpacing: '2px', fontSize: '34px', color: TextColor, cursor:'pointer'}} >STUDYTALK</Typography>
+                </Box>
             <Box sx={{
                 position: 'absolute',
                 left: '50%',
@@ -62,7 +63,7 @@ function Head() {
                 <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>{currentDay}</Typography>
             </Box>
             <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'row', flex: 1}}>
-                <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>Выход</Typography>
+                <Typography level="h2" onClick={() => window.close()} sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor, cursor: 'pointer'}}>Выход</Typography>
             </Box>
         </Box>
     )
