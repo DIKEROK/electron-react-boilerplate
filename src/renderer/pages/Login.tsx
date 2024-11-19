@@ -194,12 +194,12 @@ function Login() {
                     </Button>
                 </Box>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '650px'}}>
-                    <motion.img src={human_1} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_1} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
             <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: '150px'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '650px'}}>
-                    <motion.img src={human_2} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_2} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'flex-end', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '72px', color: TextColor}}>Помощь</Typography>
@@ -235,12 +235,12 @@ function Login() {
                     </Button>
                 </Box>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '650px'}}>
-                    <motion.img src={human_3} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_3} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
             <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', marginTop: '150px'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '300px'}}>
-                    <motion.img src={human_4} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{scale: 0, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{scale: 1, opacity: 1}} />
+                    <motion.img src={human_4} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{scale: 0, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{scale: 1, opacity: 1}} />
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '60px', color: TextColor}}>Обратная связь</Typography>

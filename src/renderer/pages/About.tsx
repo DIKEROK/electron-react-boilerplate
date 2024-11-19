@@ -37,13 +37,13 @@ function About() {
                     <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>связанные с учебой.</Typography>
                 </Box>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '500px'}}>
-                    <motion.img src={human_1} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_1} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
 
             <Box sx={{paddingTop: '50px', justifyContent: 'space-around', display: 'flex', alignItems: 'center'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '380px'}}>
-                    <motion.img src={human_2} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_2} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'flex-end', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>Обмен знаниями: Студенты могут публиковать</Typography>
@@ -66,13 +66,13 @@ function About() {
                     <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>к экзаменам.</Typography>
                 </Box>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '680px'}}>
-                    <motion.img src={human_3} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_3} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: 100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
             </Box>
             
             <Box sx={{paddingTop: '50px', justifyContent: 'space-around', display: 'flex', alignItems: 'center', marginBottom: '100px'}}>
                 <Box sx={{position: 'relative', overflow: 'hidden', width: '380px'}}>
-                    <motion.img src={human_4} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
+                    <motion.img src={human_4} alt="" style={{overflow: 'hidden', objectFit: 'contain', width: '100%', height: '100%'}} initial={{x: -100, opacity: 0}} transition={{duration:1, type: "spring", ease: "linear"}} whileInView={{x: 0, opacity: 1}} />
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'flex-end', justifyContent: 'center', flexDirection: 'column'}}>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>Доступность ресурсов: STUDYTALK предлагает </Typography>
