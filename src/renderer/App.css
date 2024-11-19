@@ -4,12 +4,23 @@
   overflow: visible;
 }
 
+
+
 :root {
   background: linear-gradient(75deg, #e9a5ff, #FCF2FF, #FCF2FF, #efbeff);
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
   padding-left: 150px;
   padding-right: 150px;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255, 198, 255) rgb(255, 255, 255);
+  overflow: auto;
+}
+
+:root::-webkit-scrollbar-thumb {
+  background-color: #050c26; /* Цвет бегунка */
+  border-radius: 20px; /* Округление бегунка */
+  border: 3px solid #050c26; /* Оформление границ бегунка */
 }
 
 @keyframes gradient {

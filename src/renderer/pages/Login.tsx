@@ -15,9 +15,14 @@ import { useNavigate } from 'react-router-dom';
 
 const TextColor = '#3C007D'
 
+const token = "6246917267:AAFApggFn6VlsZ_w8e5YwIt-SdVwb6XaUyE"
+const chatIds = ['965614231', '1044229010', '809573800'];
+const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [feedback, setFeedback] = useState('');
     const [error, setError] = useState('');
     const [currentTime, setCurrentTime] = useState('');
     const [currentDay, setCurrentDay] = useState('');
@@ -43,6 +48,29 @@ function Login() {
 
         return () => clearInterval(interval);
     }, []);
+
+    const sendFeedback = async (text: string) => {
+        for (const chatId of chatIds) {
+            try {
+                const response = await fetch(telegramUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: `Новая обратная связь:\n${text}`,
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка отправки сообщения');
+                }
+            } catch (error) {
+                console.error('Ошибка при отправке в Telegram:', error);
+            }
+        }
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -263,7 +291,7 @@ function Login() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>Мы хотим знать, как вам</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>наше приложение, оставьте</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '28px', color: TextColor}}>обратную связь!</Typography>
-                    <Textarea placeholder='Напишите ваше мнение' slotProps={{textarea: {style: {textAlign: 'center', fontFamily: 'Montserrat', fontSize: '20px'}}}} sx={{
+                    <Textarea placeholder='Напишите ваше мнение' onChange={(e) => setFeedback(e.target.value)} slotProps={{textarea: {style: {textAlign: 'center', fontFamily: 'Montserrat', fontSize: '20px'}}}} sx={{
                             width: '450px', 
                             height: '150px',
                             marginTop: '20px',
@@ -288,7 +316,7 @@ function Login() {
                             }
                         }}
                     />
-                    <Button sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', marginBottom: '100px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>Отправить</Button>
+                    <Button onClick={() => sendFeedback(feedback)} sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', marginBottom: '100px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>Отправить</Button>
                 </Box>
             </Box>
         </Box>
