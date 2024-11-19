@@ -73,14 +73,16 @@ function Registration() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '10px',
-                paddingTop: '20px',
+                paddingTop: '40px',
                 paddingBottom: '20px'
             }}>
                 <Typography level="h2" sx={{fontFamily: "Montserrat", letterSpacing: '2px', fontSize: '34px', color: TextColor}}>Регистрация</Typography>
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '10px'
+                    gap: '10px',
+                    alignItems:'center',
+                    paddingTop:'10px',
                 }}>
                     <Input 
                         value={name}
@@ -289,10 +291,13 @@ function Registration() {
                         onClick={handleRegistration}
                         sx={{
                             fontFamily: 'Montserrat', 
-                            background: 'linear-gradient(to left, #8400FF, #FF00F6)'
+                            background: 'linear-gradient(to left, #8400FF, #FF00F6)',
+                            borderRadius: '30px',
+                            width: '200px',
+                            height: '50px',
                         }}
                     >
-                        Зарегистрироваться
+                        Регистрация
                     </Button>
                 </Box>
             </Box>
@@ -303,10 +308,10 @@ function Registration() {
                     {error}
                 </Typography>
             )}
-            <Button onClick={() => navigate('/')} sx={{
-                fontFamily: 'Montserrat',
-                color: TextColor
-            }}>Назад</Button>
+            <Box sx={{display: 'flex', alignItems: 'baseline', justifyContent:'center'}}>
+                    <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '20px', color: TextColor}}>Есть аккаунт?</Typography>
+                    <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}} onClick={() => navigate('/')}>На главную</Button>
+            </Box>
         </Box>
     )
 }
