@@ -5,6 +5,8 @@ import './App.css';
 import '@fontsource/inter';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import Regestration from './pages/Regestration';
+import About from './pages/About';
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -32,6 +34,14 @@ export default function App() {
                 <Route 
                     path="/chat" 
                     element={isAuthenticated ? <Home /> : <Navigate to="/" />} 
+                />
+                <Route 
+                    path="/regestration" 
+                    element={isAuthenticated ? <Navigate to="/chat" /> : <Regestration />} 
+                />
+                <Route 
+                    path="/about" 
+                    element={isAuthenticated ? <Navigate to="/chat" /> : <About />} 
                 />
             </Routes>
         </Router>

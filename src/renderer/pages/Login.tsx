@@ -11,6 +11,7 @@ import human_4 from "../../../assets/images/Login_Human_4.png"
 import logo from "../../../assets/images/Logo_without_text.svg"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const TextColor = '#3C007D'
 
@@ -22,6 +23,8 @@ function Login() {
     const [currentDay, setCurrentDay] = useState('');
     
     const auth = getAuth(app);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -103,7 +106,7 @@ function Login() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>• Удобный способ социализации студентов</Typography>
                 </Box>
                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                    <img src={icon} alt="icon" />
+                    <img src={icon} alt="icon"  />
                     <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor}}>Стань частью чего-то</Typography>
                     <Typography level="h2" sx={{fontFamily: "Montserrat", fontSize: '24px', color: TextColor, marginBottom: '20px'}}>большего вместе с нами!</Typography>
                     <Input 
@@ -195,7 +198,7 @@ function Login() {
                     )}
                     <Box sx={{display: 'flex', alignItems: 'baseline'}}>
                         <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '20px', color: TextColor}}>Нет аккаунта?</Typography>
-                        <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}}>Зарегистрироваться</Button>
+                        <Button sx={{ marginBottom: '20px', paddingInline: '10px', fontFamily: 'Montserrat', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', '-webkit-background-clip': 'text', '-webkit-text-fill-color': 'transparent'}} onClick={() => navigate('/regestration')}>Зарегистрироваться</Button>
                     </Box>
                 </Box>
             </Box>
@@ -208,6 +211,7 @@ function Login() {
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>жизнь проще и</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>интереснее!</Typography>
                     <Button 
+                        onClick={() => navigate('/about')}
                         sx={{width: '350px', fontFamily: 'Montserrat', height: '60px', marginTop: '20px', borderRadius: '60px', fontSize: '20px', background: 'linear-gradient(to left, #8400FF, #FF00F6)'}}>
                         Узнать больше
                     </Button>
