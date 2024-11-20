@@ -65,7 +65,7 @@ function FriendProfile() {
             
             try {
                 const friendsData = await Promise.all(
-                    userData.friends.map(async (friendId) => {
+                    userData.friends.slice(0, 2).map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
                         return friendDoc.data() as UserData;
                     })
@@ -159,7 +159,7 @@ function FriendProfile() {
                             right: 0,
                             bottom: 0,
                             borderRadius: '25px',
-                            border: '2px solid rgba(60, 0, 125, 0.1)',
+                            border: '2px solid transparent',
                             WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
                             WebkitMaskComposite: 'destination-out',
                             maskComposite: 'exclude'
@@ -168,24 +168,7 @@ function FriendProfile() {
                         <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
                             Друзья
                         </Typography>
-                        <Box sx={{
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            gap: '20px',
-                            maxHeight: '180px',
-                            overflowY: 'auto',
-                            '&::-webkit-scrollbar': {
-                                width: '8px',
-                            },
-                            '&::-webkit-scrollbar-track': {
-                                background: 'rgba(0, 0, 0, 0.1)',
-                                borderRadius: '4px',
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                                background: 'linear-gradient(45deg, #8400FF, #FF00F6)',
-                                borderRadius: '4px',
-                            }
-                        }}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
                             {friends.map((friend, index) => (
                                 <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
                                     <Avatar 
@@ -225,7 +208,7 @@ function FriendProfile() {
                         right: 0,
                         bottom: 0,
                         borderRadius: '25px',
-                        border: '2px solid rgba(60, 0, 125, 0.1)',
+                        border: '2px solid transparent',
                         WebkitMaskComposite: 'destination-out',
                         maskComposite: 'exclude'
                     }
