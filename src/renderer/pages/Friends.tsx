@@ -2,9 +2,9 @@ import { Box, Typography, Button, Input, Avatar } from "@mui/joy";
 import Head from "../components/Head";
 import { getAuth } from "firebase/auth";
 import { useState, useEffect } from "react";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, onSnapshot } from "firebase/firestore";
 import { app } from "../firebase";
-import { getDoc, doc, collection, query, where, getDocs, updateDoc, onSnapshot } from "firebase/firestore";
+import { getDoc, doc, collection, getDocs, updateDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 
 const TextColor = '#3C007D';
@@ -24,19 +24,21 @@ function Friends() {
     const [friends, setFriends] = useState<UserData[]>([]);
     const [friendRequests, setFriendRequests] = useState<UserData[]>([]);
     const [searchEmail, setSearchEmail] = useState('');
-    const [searchResult, setSearchResult] = useState<UserData | null>(null);
+    const [searchResult, setSearchResult] = useState<UserData[]>([]);
     const [error, setError] = useState('');
 
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     useEffect(() => {
-        const fetchUserDataAndFriends = async () => {
-            if (!auth.currentUser) return;
-            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-            if (userDoc.exists()) {
-                const currentUserData = userDoc.data() as UserData;
+        if (!auth.currentUser) return;
+
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        const unsubscribe = onSnapshot(userRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const currentUserData = docSnapshot.data() as UserData;
                 setUserData(currentUserData);
+
                 const friendsData = await Promise.all(
                     currentUserData.friends.map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
@@ -44,6 +46,7 @@ function Friends() {
                     })
                 );
                 setFriends(friendsData);
+
                 const requestsData = await Promise.all(
                     currentUserData.friendRequests.map(async (requestId) => {
                         const requestDoc = await getDoc(doc(db, "users", requestId));
@@ -52,41 +55,46 @@ function Friends() {
                 );
                 setFriendRequests(requestsData);
             }
-        };
-        fetchUserDataAndFriends();
+        });
+
+        return () => unsubscribe();
     }, [auth.currentUser]);
 
-    // Поиск пользователя по email
-    const handleSearch = async () => {
-        try {
-            const usersRef = collection(db, "users");
-            const querySnapshot = await getDocs(usersRef);
-            const searchTerms = searchEmail.toLowerCase().split(' ');
-            
-            let foundUser = null;
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data() as UserData;
-                const fullName = `${userData.name} ${userData.surname}`.toLowerCase();
-                
-                if (searchTerms.every(term => fullName.includes(term))) {
-                    foundUser = { ...userData, uid: doc.id };
-                }
-            });
-
-            if (foundUser) {
-                setSearchResult(foundUser);
-                setError('');
-            } else {
-                setSearchResult(null);
-                setError('Пользователь не найден');
+    useEffect(() => {
+        const searchUsers = async () => {
+            if (!searchEmail.trim() || !auth.currentUser) {
+                setSearchResult([]);
+                return;
             }
-        } catch (error) {
-            console.error("Ошибка при поиске:", error);
-            setError('Произошла ошибка при поиске');
-        }
-    };
 
-    // Отправка запроса в друзья
+            try {
+                const usersRef = collection(db, "users");
+                const querySnapshot = await getDocs(usersRef);
+                const searchTerms = searchEmail.toLowerCase().split(' ');
+                
+                let foundUsers: UserData[] = [];
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data() as UserData;
+                    const fullName = `${userData.name} ${userData.surname}`.toLowerCase();
+                    
+                    if (doc.id === auth.currentUser!.uid) {
+                        return;
+                    }
+                    
+                    if (searchTerms.every(term => fullName.includes(term))) {
+                        foundUsers.push({ ...userData, uid: doc.id });
+                    }
+                });
+
+                setSearchResult(foundUsers);
+            } catch (error) {
+                console.error("Ошибка при поиске:", error);
+            }
+        };
+
+        searchUsers();
+    }, [searchEmail, db, auth.currentUser]);
+
     const sendFriendRequest = async (targetUserId: string) => {
         if (!auth.currentUser) return;
 
@@ -101,18 +109,15 @@ function Friends() {
             
             const targetUserData = targetUserDoc.data() as UserData;
             
-            // Проверяем инициализацию массивов
             if (!targetUserData.friendRequests) {
                 targetUserData.friendRequests = [];
             }
             
-            // Проверяем, не отправлен ли уже запрос
             if (targetUserData.friendRequests.includes(auth.currentUser.uid)) {
                 setError('Запрос уже отправлен');
                 return;
             }
 
-            // Проверяем, не являются ли пользователи уже друзьями
             if (targetUserData.friends && targetUserData.friends.includes(auth.currentUser.uid)) {
                 setError('Этот пользователь уже в списке друзей');
                 return;
@@ -122,7 +127,7 @@ function Friends() {
                 friendRequests: [...targetUserData.friendRequests, auth.currentUser.uid]
             });
 
-            setSearchResult(null);
+            setSearchResult([]);
             setSearchEmail('');
             setError('Запрос отправлен');
         } catch (error) {
@@ -131,19 +136,16 @@ function Friends() {
         }
     };
 
-    // Принятие запроса в друзья
     const acceptFriendRequest = async (requesterId: string) => {
         if (!auth.currentUser || !userData) return;
 
         try {
-            // Обновление данных текущего пользователя
             const currentUserRef = doc(db, "users", auth.currentUser.uid);
             await updateDoc(currentUserRef, {
                 friends: [...userData.friends, requesterId],
                 friendRequests: userData.friendRequests.filter(id => id !== requesterId)
             });
 
-            // Обновление данных отправителя запроса
             const requesterRef = doc(db, "users", requesterId);
             const requesterDoc = await getDoc(requesterRef);
             const requesterData = requesterDoc.data() as UserData;
@@ -151,13 +153,53 @@ function Friends() {
                 friends: [...requesterData.friends, auth.currentUser.uid]
             });
 
-            // Обновление локального состояния
             const updatedRequests = friendRequests.filter(request => request.uid !== requesterId);
             setFriendRequests(updatedRequests);
             const requesterWithId = { ...requesterData, uid: requesterId };
             setFriends([...friends, requesterWithId]);
         } catch (error) {
             console.error("Ошибка при принятии запроса:", error);
+        }
+    };
+
+    const rejectFriendRequest = async (requesterId: string) => {
+        if (!auth.currentUser || !userData) return;
+
+        try {
+            const currentUserRef = doc(db, "users", auth.currentUser.uid);
+            await updateDoc(currentUserRef, {
+                friendRequests: userData.friendRequests.filter(id => id !== requesterId)
+            });
+
+            const updatedRequests = friendRequests.filter(request => request.uid !== requesterId);
+            setFriendRequests(updatedRequests);
+        } catch (error) {
+            console.error("Ошибка при отклонении запроса:", error);
+            setError('Ошибка при отклонении запроса');
+        }
+    };
+
+    const removeFriend = async (friendId: string) => {
+        if (!auth.currentUser || !userData) return;
+
+        try {
+            const currentUserRef = doc(db, "users", auth.currentUser.uid);
+            await updateDoc(currentUserRef, {
+                friends: userData.friends.filter(id => id !== friendId)
+            });
+
+            const friendRef = doc(db, "users", friendId);
+            const friendDoc = await getDoc(friendRef);
+            const friendData = friendDoc.data() as UserData;
+            await updateDoc(friendRef, {
+                friends: friendData.friends.filter(id => id !== auth.currentUser!.uid)
+            });
+
+            const updatedFriends = friends.filter(friend => friend.uid !== friendId);
+            setFriends(updatedFriends);
+        } catch (error) {
+            console.error("Ошибка при удалении друга:", error);
+            setError('Ошибка при удалении друга');
         }
     };
 
@@ -178,32 +220,30 @@ function Friends() {
                             placeholder="Введите имя и фамилию"
                             sx={{width: '300px'}}
                         />
-                        <Button onClick={handleSearch}>Найти</Button>
                     </Box>
 
-                    {error && (
-                        <Typography color="danger" sx={{marginBottom: '20px'}}>
-                            {error}
-                        </Typography>
-                    )}
-
-                    {searchResult && (
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            padding: '10px',
-                            borderRadius: '10px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            marginBottom: '30px'
-                        }}>
-                            <Avatar src={searchResult.photoURL} />
-                            <Typography>
-                                {`${searchResult.name} ${searchResult.surname}`}
-                            </Typography>
-                            <Button onClick={() => sendFriendRequest(searchResult.uid!)}>
-                                Добавить в друзья
-                            </Button>
+                    {searchResult.length > 0 && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: '30px' }}>
+                            {searchResult.map((user) => (
+                                <Box key={user.uid} sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 2,
+                                    padding: '10px',
+                                    borderRadius: '10px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }}>
+                                    <Avatar src={user.photoURL} />
+                                    <Typography>
+                                        {`${user.name} ${user.surname}`}
+                                    </Typography>
+                                    {!userData?.friends.includes(user.uid!) && (
+                                        <Button onClick={() => sendFriendRequest(user.uid!)}>
+                                            Добавить в друзья
+                                        </Button>
+                                    )}
+                                </Box>
+                            ))}
                         </Box>
                     )}
 
@@ -224,9 +264,17 @@ function Friends() {
                                 <Typography>
                                     {`${request.name} ${request.surname}`}
                                 </Typography>
-                                <Button onClick={() => acceptFriendRequest(request.uid!)}>
-                                    Принять
-                                </Button>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Button onClick={() => acceptFriendRequest(request.uid!)}>
+                                        Принять
+                                    </Button>
+                                    <Button 
+                                        onClick={() => rejectFriendRequest(request.uid!)}
+                                        color="danger"
+                                    >
+                                        Отклонить
+                                    </Button>
+                                </Box>
                             </Box>
                         ))}
                     </Box>
@@ -248,6 +296,13 @@ function Friends() {
                                 <Typography>
                                     {`${friend.name} ${friend.surname}`}
                                 </Typography>
+                                <Button 
+                                    onClick={() => removeFriend(friend.uid!)}
+                                    color="danger"
+                                    variant="soft"
+                                >
+                                    Удалить
+                                </Button>
                             </Box>
                         ))}
                     </Box>
