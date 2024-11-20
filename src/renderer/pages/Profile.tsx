@@ -3,7 +3,7 @@ import Head from "../components/Head";
 import { useEffect, useState, useRef } from "react";
 import { app } from "../firebase";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, updateDoc, getFirestore } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getFirestore, collection, getDocs } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface UserData {
@@ -11,6 +11,7 @@ interface UserData {
     surname: string;
     patronymic: string;
     photoURL?: string;
+    friends?: string[];
 }
 
 function Profile() {
@@ -20,6 +21,7 @@ function Profile() {
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const [friends, setFriends] = useState<UserData[]>([]);
 
     const getInitials = () => {
         if (userData) {
@@ -80,47 +82,118 @@ function Profile() {
         fetchUserData();
     }, [auth.currentUser]);
 
+    useEffect(() => {
+        const fetchFriends = async () => {
+            if (!userData?.friends) return;
+            
+            try {
+                const friendsData = await Promise.all(
+                    userData.friends.slice(0, 2).map(async (friendId) => {
+                        const friendDoc = await getDoc(doc(db, "users", friendId));
+                        return friendDoc.data() as UserData;
+                    })
+                );
+                setFriends(friendsData);
+            } catch (error) {
+                console.error("Ошибка при загрузке друзей:", error);
+            }
+        };
+
+        fetchFriends();
+    }, [userData?.friends]);
+
     return (
         <Box>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
                 <Head />
             </Box>
             <Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                     <Avatar
                         src={userData?.photoURL}
                         sx={{ 
-                            width: 80, 
-                            height: 80,
+                            width: 180, 
+                            height: 180,
                             fontSize: '1.5rem',
                             background: 'linear-gradient(45deg, #959AFF, #D89EFF)'
                         }}
                     >
                         {getInitials()}
                     </Avatar>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                    />
-                    <Button
-                        onClick={handleFileSelect}
-                        disabled={uploading}
-                        sx={{
-                            fontFamily: 'Montserrat',
-                            background: 'linear-gradient(to left, #8400FF, #FF00F6)',
-                            borderRadius: '30px',
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px'}}>
+                        <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
+                            <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.surname}</Typography>
+                            <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.name}</Typography>
+                        </Box>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                            onChange={handleFileUpload}
+                        />
+                        <Button
+                            onClick={handleFileSelect}
+                            disabled={uploading}
+                            sx={{
+                                fontFamily: 'Montserrat',
+                                background: 'linear-gradient(to left, #F480FF, #B14BFF)',
+                                borderRadius: '30px',
+                                width: '250px',
+                                height: '50px',
+                            }}
+                        >
+                            {uploading ? 'Загрузка...' : 'Изменить фото'}
+                        </Button>
+                    </Box>
+                </Box>
+                <Box sx={{
+                            marginTop: '50px',
+                            width: '450px', 
+                            height: '280px',
+                            marginBottom: '20px',
+                            position: 'relative',
+                            padding: '30px',
+                            boxShadow: 'none',
+                            borderColor: 'rgba(0, 0, 0, 0)',
+                            backgroundColor: 'transparent', 
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: '25px',
+                                border: '2px solid transparent',
+                                background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
+                                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                                WebkitMaskComposite: 'destination-out',
+                                maskComposite: 'exclude'
+                            }
                         }}
                     >
-                        {uploading ? 'Загрузка...' : 'Изменить фото'}
-                    </Button>
-                    <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
-                        <Typography level="h4">{userData?.name}</Typography>
-                        <Typography level="h4">{userData?.surname}</Typography>
-                        <Typography level="h4">{userData?.patronymic}</Typography>
-                    </Box>
+                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '34px'}}>Друзья</Typography>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+                            {friends.map((friend, index) => (
+                                <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
+                                    <Avatar 
+                                        src={friend.photoURL} 
+                                        sx={{
+                                            width: 90, 
+                                            height: 90,
+                                            fontSize: '1.5rem',
+                                            background: 'linear-gradient(45deg, #959AFF, #D89EFF)'
+                                        }}
+                                    >
+                                        {friend.name?.[0]}{friend.surname?.[0]}
+                                    </Avatar>
+                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
+                                        {friend.name} {friend.surname}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </Box>
                 </Box>
             </Box>
         </Box>
