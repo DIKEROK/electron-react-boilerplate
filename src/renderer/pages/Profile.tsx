@@ -3,15 +3,34 @@ import Head from "../components/Head";
 import { useEffect, useState, useRef } from "react";
 import { app } from "../firebase";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, updateDoc, getFirestore, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc, getFirestore, collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import CreatePost from '../components/CreatePost';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
+    uid?: string;
     name: string;
     surname: string;
     patronymic: string;
     photoURL?: string;
-    friends?: string[];
+    friends: string[];
+    friendRequests: string[];
+    email: string;
+}
+
+interface Post {
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string;
+    createdAt: string;
+    userId: string;
+    likes: number;
+    comments: any[];
 }
 
 function Profile() {
@@ -22,6 +41,11 @@ function Profile() {
     const db = getFirestore(app);
     const storage = getStorage(app);
     const [friends, setFriends] = useState<UserData[]>([]);
+    const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [currentPostIndex, setCurrentPostIndex] = useState(0);
+
+    const navigate = useNavigate();
 
     const getInitials = () => {
         if (userData) {
@@ -43,22 +67,17 @@ function Profile() {
         try {
             setUploading(true);
             
-            // Создаем ссылку на место хранения в Storage
             const storageRef = ref(storage, `avatars/${auth.currentUser.uid}`);
             
-            // Загружаем файл
             await uploadBytes(storageRef, file);
             
-            // Получаем URL загруженного файла
             const downloadURL = await getDownloadURL(storageRef);
             
-            // Обновляем документ пользователя в Firestore
             const userRef = doc(db, "users", auth.currentUser.uid);
             await updateDoc(userRef, {
                 photoURL: downloadURL
             });
             
-            // Обновляем локальное состояние
             setUserData(prev => prev ? {...prev, photoURL: downloadURL} : null);
             
         } catch (error) {
@@ -102,12 +121,69 @@ function Profile() {
         fetchFriends();
     }, [userData?.friends]);
 
+    const fetchPosts = async () => {
+        if (!auth.currentUser) return;
+        
+        try {
+            console.log("Fetching posts...");
+            const postsQuery = query(
+                collection(db, "posts"),
+                where("userId", "==", auth.currentUser.uid),
+                orderBy("createdAt", "desc")
+            );
+            
+            const querySnapshot = await getDocs(postsQuery);
+            const fetchedPosts = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Post));
+            
+            console.log("Fetched posts:", fetchedPosts);
+            setPosts(fetchedPosts);
+            setCurrentPostIndex(0);
+        } catch (error) {
+            console.error("Ошибка при загрузке постов:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (auth.currentUser) {
+            fetchPosts();
+        }
+    }, [auth.currentUser]);
+
+    const handlePrevPost = () => {
+        setCurrentPostIndex(prev => prev + 1);
+    };
+
+    const handleNextPost = () => {
+        setCurrentPostIndex(prev => prev - 1);
+    };
+
+    const handleDeletePost = async (postId: string) => {
+        if (!auth.currentUser) return;
+        
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            
+            const updatedPosts = posts.filter(post => post.id !== postId);
+            setPosts(updatedPosts);
+            
+            if (currentPostIndex >= updatedPosts.length) {
+                setCurrentPostIndex(Math.max(0, updatedPosts.length - 1));
+            }
+        } catch (error) {
+            console.error("Ошибка при удалении поста:", error);
+        }
+    };
+
     return (
         <Box>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
                 <Head />
             </Box>
-            <Box>
+            <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '50px'}}>
+                <Box>
                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                     <Avatar
                         src={userData?.photoURL}
@@ -139,7 +215,7 @@ function Profile() {
                                 fontFamily: 'Montserrat',
                                 background: 'linear-gradient(to left, #F480FF, #B14BFF)',
                                 borderRadius: '30px',
-                                width: '250px',
+                                width: '200px',
                                 height: '50px',
                             }}
                         >
@@ -156,7 +232,8 @@ function Profile() {
                             padding: '30px',
                             boxShadow: 'none',
                             borderColor: 'rgba(0, 0, 0, 0)',
-                            backgroundColor: 'transparent', 
+                            background: 'linear-gradient(to top, #E7E6FF, #E5CDFF)',
+                            borderRadius: '25px',
                             '&::before': {
                                 content: '""',
                                 position: 'absolute',
@@ -166,17 +243,15 @@ function Profile() {
                                 bottom: 0,
                                 borderRadius: '25px',
                                 border: '2px solid transparent',
-                                background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
-                                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
                                 WebkitMaskComposite: 'destination-out',
                                 maskComposite: 'exclude'
                             }
                         }}
                     >
-                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '34px'}}>Друзья</Typography>
+                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>Друзья</Typography>
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
                             {friends.map((friend, index) => (
-                                <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
+                                <Box onClick={() => navigate(`/friend/${friend.uid}`)} key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
                                     <Avatar 
                                         src={friend.photoURL} 
                                         sx={{
@@ -194,8 +269,202 @@ function Profile() {
                                 </Box>
                             ))}
                         </Box>
+                    </Box>
+                </Box>
+                <Box sx={{
+                            width: '500px', 
+                            height: '510px',
+                            marginBottom: '20px',
+                            position: 'relative',
+                            padding: '30px',
+                            boxShadow: 'none',
+                            borderColor: 'rgba(0, 0, 0, 0)',
+                            background: 'linear-gradient(to top, #E7E6FF, #E5CDFF)',
+                            borderRadius: '25px',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: '25px',
+                                border: '2px solid transparent',
+                                WebkitMaskComposite: 'destination-out',
+                                maskComposite: 'exclude'
+                            }
+                        }}
+                    >
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center'}}>
+                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
+                            Ваши посты
+                        </Typography>
+                    </Box>
+                    
+                    {posts.length > 0 ? (
+                        <>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '20px',
+                                background: 'transparent',
+                                borderRadius: '25px',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '300px',
+                                position: 'relative'
+                            }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
+                                        {posts[currentPostIndex]?.title}
+                                    </Typography>
+                                    <Button
+                                        onClick={() => handleDeletePost(posts[currentPostIndex].id)}
+                                        color="danger"
+                                        variant="soft"
+                                        sx={{
+                                            fontFamily: 'Montserrat',
+                                            marginBottom: '50px',
+                                            minWidth: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            padding: 0
+                                        }}
+                                    >
+                                        <DeleteIcon />
+                                    </Button>
+                                </Box>
+                                
+                                {posts[currentPostIndex]?.imageUrl && (
+                                    <Box sx={{
+                                        width: '100%',
+                                        height: '200px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <img 
+                                            src={posts[currentPostIndex].imageUrl}
+                                            alt="Post"
+                                            style={{
+                                                maxWidth: '100%',
+                                                maxHeight: '100%',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    </Box>
+                                )}
+                                
+                                <Typography sx={{
+                                    fontFamily: 'Montserrat',
+                                    fontSize: '16px',
+                                    textAlign: 'center',
+                                    maxHeight: '100px',
+                                    overflow: 'auto'
+                                }}>
+                                    {posts[currentPostIndex]?.content}
+                                </Typography>
+
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    width: '100%',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    px: 2
+                                }}>
+                                    <Button
+                                        onClick={handleNextPost}
+                                        disabled={currentPostIndex === 0}
+                                        sx={{
+                                            minWidth: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            background: 'transparent',
+                                            visibility: currentPostIndex === 0 ? 'hidden' : 'visible'
+                                        }}
+                                    >
+                                        <ArrowBackIosNewIcon />
+                                    </Button>
+                                    
+                                    <Button
+                                        onClick={handlePrevPost}
+                                        disabled={currentPostIndex === posts.length - 1}
+                                        sx={{
+                                            minWidth: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            background: 'transparent',
+                                            visibility: currentPostIndex === posts.length - 1 ? 'hidden' : 'visible'
+                                        }}
+                                    >
+                                        <ArrowForwardIosIcon />
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </>
+                    ) : (
+                        <Typography sx={{
+                            fontFamily: 'Montserrat',
+                            fontSize: '16px',
+                            textAlign: 'center'
+                        }}>
+                            У вас пока нет постов
+                        </Typography>
+                    )}
+
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', mt: 4}}>
+                        <Button 
+                            onClick={() => setIsCreatePostOpen(true)}
+                            sx={{
+                                fontFamily: 'Montserrat',
+                                background: 'linear-gradient(to left, #F480FF, #B14BFF)',
+                                borderRadius: '30px',
+                                width: '200px',
+                                height: '50px'
+                            }}
+                        >
+                            Написать пост
+                        </Button>
+                    </Box>
                 </Box>
             </Box>
+            {isCreatePostOpen && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000,
+                        padding: '20px'
+                    }}
+                    onClick={() => setIsCreatePostOpen(false)}
+                >
+                    <Box 
+                        onClick={(e) => e.stopPropagation()}
+                        sx={{
+                            width: '100%',
+                            maxWidth: '800px',
+                            maxHeight: '90vh',
+                            overflowY: 'auto'
+                        }}
+                    >
+                        <CreatePost 
+                            onClose={() => setIsCreatePostOpen(false)} 
+                            onPostCreated={fetchPosts}
+                        />
+                    </Box>
+                </Box>
+            )}
         </Box>
     );
 }

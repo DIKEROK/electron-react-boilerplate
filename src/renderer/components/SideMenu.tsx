@@ -34,14 +34,12 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Создаем подписку на изменения документа пользователя
         const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
             if (doc.exists()) {
                 setUserData(doc.data() as UserData);
             }
         });
 
-        // Отписываемся при размонтировании компонента
         return () => unsubscribe();
     }, [auth.currentUser]);
 

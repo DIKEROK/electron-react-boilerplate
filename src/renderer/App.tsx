@@ -12,9 +12,10 @@ import Background from './components/Background';
 import News from './pages/News';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
+import FriendProfile from './pages/FriendProfile';
 import ChatList from './pages/ChatList';
 
-// Создаем отдельный компонент для роутинга
+
 function AppRoutes() {
     const location = useLocation();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -63,12 +64,15 @@ function AppRoutes() {
                     path="/chatlist"
                     element={<ChatList />}
                 />
+                <Route 
+                    path="/friend/:friendId"
+                    element={<FriendProfile />}
+                />
             </Routes>
         </AnimatePresence>
     );
 }
 
-// Основной компонент App теперь оборачивает роуты в Router
 export default function App() {
     return (
         <Router>

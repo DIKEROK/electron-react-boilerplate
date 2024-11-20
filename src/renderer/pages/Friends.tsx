@@ -2,6 +2,7 @@ import { Box, Typography, Button, Input, Avatar } from "@mui/joy";
 import Head from "../components/Head";
 import { getAuth } from "firebase/auth";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getFirestore, onSnapshot } from "firebase/firestore";
 import { app } from "../firebase";
 import { getDoc, doc, collection, getDocs, updateDoc } from "firebase/firestore";
@@ -26,6 +27,7 @@ function Friends() {
     const [searchEmail, setSearchEmail] = useState('');
     const [searchResult, setSearchResult] = useState<UserData[]>([]);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -290,10 +292,10 @@ function Friends() {
                                 gap: 2,
                                 padding: '10px',
                                 borderRadius: '10px',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             }}>
-                                <Avatar src={friend.photoURL} />
-                                <Typography>
+                                <Avatar sx={{cursor: 'pointer'}} src={friend.photoURL} onClick={() => navigate(`/friend/${friend.uid}`)}/>
+                                <Typography sx={{cursor: 'pointer'}} onClick={() => navigate(`/friend/${friend.uid}`)}>
                                     {`${friend.name} ${friend.surname}`}
                                 </Typography>
                                 <Button 
