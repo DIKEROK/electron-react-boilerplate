@@ -11,6 +11,9 @@ import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import InfoRoundedIcon from '@mui/icons-material/NotListedLocationRounded';
+import EditNotificationsRoundedIcon from '@mui/icons-material/EditNotificationsRounded';
+import Feedback from '../pages/feedback';
 const TextColor = '#3C007D';
 
 interface SideMenuProps {
@@ -22,6 +25,9 @@ interface UserData {
     name: string;
     surname: string;
     photoURL?: string;
+    college: string;
+    course: string;
+    job: string;    
 }
 
 function SideMenu({isOpen, onClose}: SideMenuProps) {
@@ -29,6 +35,7 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
     const auth = getAuth(app);
     const db = getFirestore(app);
     const navigate = useNavigate();
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -94,7 +101,7 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                     top: 0,
                     bottom: 0,
                     width: '250px',
-                    background: 'linear-gradient(to top, #FFC4EA, #F5D8FF)',
+                    background: 'linear-gradient(45deg, #e9d1ff, #eebdff)',
                     borderRadius: '0 20px 20px 0',
                     boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
                     zIndex: 1000,
@@ -129,28 +136,86 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                     >
                         {userData ? `${userData.name} ${userData.surname}` : 'Загрузка...'}
                     </Typography>
-                    <Box onClick={() => navigate('/profile')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <Typography 
+                        level="h4" 
+                        sx={{
+                            fontFamily: 'Montserrat',
+                            fontSize: '14px',
+                            color: TextColor,
+                            marginTop: '-12px'
+                        }}
+                    >
+                        {userData ? `Студент ${userData.college}, ${userData.course} Курса ${userData.job}` : 'Загрузка...'}
+                    </Typography>
+                    <Box onClick={() => navigate('/profile')} sx={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        cursor: 'pointer',
+                        width: '100%',
+                        gap: '10px',
+                        paddingLeft: '20px'
+                    }}>
                         <PersonIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Профиль</Typography>
                     </Box>
-                    <Box onClick={() => navigate('/news')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <Box onClick={() => navigate('/news')} sx={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        cursor: 'pointer',
+                        width: '100%',
+                        gap: '10px',
+                        paddingLeft: '20px'
+                    }}>
                         <ArticleRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Новости</Typography>
                     </Box>
-                    <Box onClick={() => navigate('/friends')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <Box onClick={() => navigate('/friendss')} sx={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        cursor: 'pointer',
+                        width: '100%',
+                        gap: '10px',
+                        paddingLeft: '20px'
+                    }}>
                         <GroupRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Друзья</Typography>
                     </Box>
-                    <Box onClick={() => navigate('/chatlist')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <Box onClick={() => navigate('/chatlist')} sx={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        cursor: 'pointer',
+                        width: '100%',
+                        gap: '10px',
+                        paddingLeft: '20px'
+                    }}>
                         <ForumRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Чаты</Typography>
                     </Box>
-                    <Box onClick={handleLogout} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer', marginTop: '450px'}}>
-                        <LogoutRoundedIcon />
-                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Выйти из аккаунта</Typography>
+                    <Box onClick={() => navigate('/about')} sx={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        cursor: 'pointer',
+                        width: '100%',
+                        gap: '10px',
+                        paddingLeft: '20px'
+                    }}>
+                        <InfoRoundedIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>О нас</Typography>
                     </Box>
+                    <Button 
+                        onClick={handleLogout}
+                        sx={{width: '40px', fontFamily: 'Montserrat', height: '40px', marginBottom: '20px', borderRadius: '40px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', marginTop: '345px', position: 'left', left: '-85px'}}>
+                            <LogoutRoundedIcon />
+                    </Button>
+                    <Button
+                        onClick={() => setIsFeedbackOpen(true)}
+                        sx={{width: '160px', fontFamily: 'Montserrat', height: '40px', marginBottom: '20px', borderRadius: '40px', background: 'linear-gradient(to left, #8400FF, #FF00F6)', marginTop: '-72px', position: 'left', left: '25px'}}>
+                            <EditNotificationsRoundedIcon/>
+                            <Typography level="h4" sx={{fontFamily: 'Montserrat', color: 'white', fontSize:'13px'}}>Обратная связь</Typography>
+                    </Button>
                 </Box>
             </motion.div>
+            <Feedback isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
         </>
     );
 }

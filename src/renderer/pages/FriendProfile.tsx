@@ -7,6 +7,8 @@ import { doc, getDoc, getFirestore, collection, getDocs, query, where, orderBy }
 import { useParams } from "react-router-dom";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUpRounded';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDownRounded';
 
 interface UserData {
     name: string;
@@ -32,6 +34,7 @@ function FriendProfile() {
     const [friends, setFriends] = useState<UserData[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [currentPostIndex, setCurrentPostIndex] = useState(0);
+    const [currentFriendIndex, setCurrentFriendIndex] = useState(0);
     
     const { friendId } = useParams();
     const auth = getAuth(app);
@@ -65,7 +68,7 @@ function FriendProfile() {
             
             try {
                 const friendsData = await Promise.all(
-                    userData.friends.slice(0, 2).map(async (friendId) => {
+                    userData.friends.map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
                         return friendDoc.data() as UserData;
                     })
@@ -114,6 +117,16 @@ function FriendProfile() {
         setCurrentPostIndex(prev => prev - 1);
     };
 
+    const handlePrevFriends = () => {
+        setCurrentFriendIndex(prev => Math.max(0, prev - 2));
+    };
+
+    const handleNextFriends = () => {
+        setCurrentFriendIndex(prev => 
+            Math.min(prev + 2, Math.max(0, friends.length - 2))
+        );
+    };
+
     return (
         <Box>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
@@ -159,7 +172,7 @@ function FriendProfile() {
                             right: 0,
                             bottom: 0,
                             borderRadius: '25px',
-                            border: '2px solid transparent',
+                            border: '2px solid rgba(60, 0, 125, 0.1)',
                             WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
                             WebkitMaskComposite: 'destination-out',
                             maskComposite: 'exclude'
@@ -168,8 +181,20 @@ function FriendProfile() {
                         <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
                             Друзья
                         </Typography>
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                            {friends.map((friend, index) => (
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative'}}>
+                            <Box sx={{
+                                position: 'absolute',
+                                top: -40,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                visibility: currentFriendIndex > 0 ? 'visible' : 'hidden',
+                                cursor: 'pointer',
+                                zIndex: 1
+                            }} onClick={handlePrevFriends}>
+                                <ArrowDropUpIcon sx={{ fontSize: 40 }} />
+                            </Box>
+                            
+                            {friends.slice(currentFriendIndex, currentFriendIndex + 2).map((friend, index) => (
                                 <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
                                     <Avatar 
                                         src={friend.photoURL} 
@@ -187,6 +212,18 @@ function FriendProfile() {
                                     </Typography>
                                 </Box>
                             ))}
+                            
+                            <Box sx={{
+                                position: 'absolute',
+                                bottom: -40,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                visibility: currentFriendIndex + 2 < friends.length ? 'visible' : 'hidden',
+                                cursor: 'pointer',
+                                zIndex: 1
+                            }} onClick={handleNextFriends}>
+                                <ArrowDropDownIcon sx={{ fontSize: 40 }} />
+                            </Box>
                         </Box>
                     </Box>
                 </Box>
@@ -208,7 +245,7 @@ function FriendProfile() {
                         right: 0,
                         bottom: 0,
                         borderRadius: '25px',
-                        border: '2px solid transparent',
+                        border: '2px solid rgba(60, 0, 125, 0.1)',
                         WebkitMaskComposite: 'destination-out',
                         maskComposite: 'exclude'
                     }

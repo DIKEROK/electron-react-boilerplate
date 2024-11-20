@@ -170,7 +170,7 @@ function News() {
                                 >
                                     {post.author?.name?.[0]}{post.author?.surname?.[0]}
                                 </Avatar>
-                                <Typography sx={{cursor: 'pointer'}} onClick={() => handleUserClick(post.userId)} level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>
+                                <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} onClick={() => handleUserClick(post.userId)} level="h4">
                                     {post.author?.name} {post.author?.surname}
                                 </Typography>
                             </Box>

@@ -10,6 +10,9 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUpRounded';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDownRounded';
+import EditProfile from './EditProfile';
 
 interface UserData {
     uid?: string;
@@ -20,6 +23,9 @@ interface UserData {
     friends: string[];
     friendRequests: string[];
     email: string;
+    course: number;
+    college: string;
+    job: string;
 }
 
 interface Post {
@@ -44,6 +50,8 @@ function Profile() {
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [posts, setPosts] = useState<Post[]>([]);
     const [currentPostIndex, setCurrentPostIndex] = useState(0);
+    const [currentFriendIndex, setCurrentFriendIndex] = useState(0);
+    const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -107,7 +115,7 @@ function Profile() {
             
             try {
                 const friendsData = await Promise.all(
-                    userData.friends.slice(0, 2).map(async (friendId) => {
+                    userData.friends.map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
                         return { ...friendDoc.data(), uid: friendId } as UserData;
                     })
@@ -177,6 +185,26 @@ function Profile() {
         }
     };
 
+    const handlePrevFriends = () => {
+        setCurrentFriendIndex(prev => Math.max(0, prev - 2));
+    };
+
+    const handleNextFriends = () => {
+        setCurrentFriendIndex(prev => 
+            Math.min(prev + 2, Math.max(0, friends.length - 2))
+        );
+    };
+
+    // Добавьте новую функцию для обновления данных пользователя
+    const updateUserData = async () => {
+        if (auth.currentUser) {
+            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            if (userDoc.exists()) {
+                setUserData(userDoc.data() as UserData);
+            }
+        }
+    };
+
     return (
         <Box>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
@@ -196,10 +224,17 @@ function Profile() {
                     >
                         {getInitials()}
                     </Avatar>
-                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px'}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                         <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
                             <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.surname}</Typography>
                             <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.name}</Typography>
+                        </Box>
+                        <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '5px'}}>
+                            <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>Студент {userData?.course} Курса,</Typography>
+                            <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>{userData?.college}</Typography>
+                        </Box>
+                        <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '5px', marginBottom: '20px'}}>
+                            <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>{userData?.job}</Typography>
                         </Box>
                         <input
                             type="file"
@@ -209,8 +244,7 @@ function Profile() {
                             onChange={handleFileUpload}
                         />
                         <Button
-                            onClick={handleFileSelect}
-                            disabled={uploading}
+                            onClick={() => setIsEditProfileOpen(true)}
                             sx={{
                                 fontFamily: 'Montserrat',
                                 background: 'linear-gradient(to left, #F480FF, #B14BFF)',
@@ -219,7 +253,7 @@ function Profile() {
                                 height: '50px',
                             }}
                         >
-                            {uploading ? 'Загрузка...' : 'Изменить фото'}
+                            Изменить профиль
                         </Button>
                     </Box>
                 </Box>
@@ -242,16 +276,36 @@ function Profile() {
                                 right: 0,
                                 bottom: 0,
                                 borderRadius: '25px',
-                                border: '2px solid transparent',
+                                border: '2px solid rgba(60, 0, 125, 0.1)',
                                 WebkitMaskComposite: 'destination-out',
                                 maskComposite: 'exclude'
                             }
                         }}
                     >
                         <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>Друзья</Typography>
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                            {friends.map((friend, index) => (
-                                <Box onClick={() => navigate(`/friend/${friend.uid}`)} key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative'}}>
+                            <Box sx={{
+                                position: 'absolute',
+                                top: -40,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                visibility: currentFriendIndex > 0 ? 'visible' : 'hidden',
+                                cursor: 'pointer',
+                                zIndex: 1
+                            }} onClick={handlePrevFriends}>
+                                <ArrowDropUpIcon sx={{ fontSize: 40 }} />
+                            </Box>
+                            
+                            {friends.slice(currentFriendIndex, currentFriendIndex + 2).map((friend, index) => (
+                                <Box onClick={() => navigate(`/friend/${friend.uid}`)} 
+                                    key={friend.uid} 
+                                    sx={{
+                                        display: 'flex', 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center', 
+                                        gap: '10px',
+                                        cursor: 'pointer'
+                                    }}>
                                     <Avatar 
                                         src={friend.photoURL} 
                                         sx={{
@@ -268,12 +322,24 @@ function Profile() {
                                     </Typography>
                                 </Box>
                             ))}
+                            
+                            <Box sx={{
+                                position: 'absolute',
+                                bottom: -40,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                visibility: currentFriendIndex + 2 < friends.length ? 'visible' : 'hidden',
+                                cursor: 'pointer',
+                                zIndex: 1
+                            }} onClick={handleNextFriends}>
+                                <ArrowDropDownIcon sx={{ fontSize: 40 }} />
+                            </Box>
                         </Box>
                     </Box>
                 </Box>
                 <Box sx={{
                             width: '500px', 
-                            height: '510px',
+                            height: '539px',
                             marginBottom: '20px',
                             position: 'relative',
                             padding: '30px',
@@ -289,7 +355,7 @@ function Profile() {
                                 right: 0,
                                 bottom: 0,
                                 borderRadius: '25px',
-                                border: '2px solid transparent',
+                                border: '2px solid rgba(60, 0, 125, 0.1)',
                                 WebkitMaskComposite: 'destination-out',
                                 maskComposite: 'exclude'
                             }
@@ -315,20 +381,23 @@ function Profile() {
                                 position: 'relative'
                             }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
+                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px', color: '#3C007D'}}>
                                         {posts[currentPostIndex]?.title}
                                     </Typography>
                                     <Button
                                         onClick={() => handleDeletePost(posts[currentPostIndex].id)}
-                                        color="danger"
-                                        variant="soft"
                                         sx={{
                                             fontFamily: 'Montserrat',
                                             marginBottom: '50px',
                                             minWidth: '40px',
                                             height: '40px',
                                             borderRadius: '50%',
-                                            padding: 0
+                                            padding: 0,
+                                            background: 'linear-gradient(to left, #8400FF, #FF00F6)',
+                                            color: 'white',
+                                            '&:hover': {
+                                                background: 'linear-gradient(to right, #8400FF, #FF00F6)',
+                                            }
                                         }}
                                     >
                                         <DeleteIcon />
@@ -465,6 +534,13 @@ function Profile() {
                     </Box>
                 </Box>
             )}
+            <EditProfile 
+                isOpen={isEditProfileOpen} 
+                onClose={() => {
+                    setIsEditProfileOpen(false);
+                    updateUserData(); // Обновляем данные после закрытия окна
+                }} 
+            />
         </Box>
     );
 }
