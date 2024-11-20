@@ -41,6 +41,8 @@ function Registration() {
                 surname,
                 patronymic,
                 email,
+                friends: [],
+                friendRequests: [],
                 createdAt: new Date().toISOString()
             });
 

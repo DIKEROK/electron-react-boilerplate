@@ -3,9 +3,12 @@ import { Box } from "@mui/joy";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { app } from '../firebase';
+import { useNavigate } from "react-router-dom";
 import PersonIcon from '@mui/icons-material/Person';
+import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 
 const TextColor = '#3C007D';
 
@@ -24,19 +27,21 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
     const [userData, setUserData] = useState<UserData | null>(null);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const user = auth.currentUser;
-            if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    setUserData(userDoc.data() as UserData);
-                }
-            }
-        };
+        const user = auth.currentUser;
+        if (!user) return;
 
-        fetchUserData();
+        // Создаем подписку на изменения документа пользователя
+        const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+            if (doc.exists()) {
+                setUserData(doc.data() as UserData);
+            }
+        });
+
+        // Отписываемся при размонтировании компонента
+        return () => unsubscribe();
     }, [auth.currentUser]);
 
     if (!isOpen) return null;
@@ -115,9 +120,17 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                     >
                         {userData ? `${userData.name} ${userData.surname}` : 'Загрузка...'}
                     </Typography>
-                    <Box sx={{display: 'flex', alignItems: 'center', }}>
+                    <Box onClick={() => navigate('/profile')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                         <PersonIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Профиль</Typography>
+                    </Box>
+                    <Box onClick={() => navigate('/news')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <ArticleRoundedIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Новости</Typography>
+                    </Box>
+                    <Box onClick={() => navigate('/friends')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <GroupRoundedIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Друзья</Typography>
                     </Box>
                 </Box>
             </motion.div>

@@ -1,6 +1,4 @@
-import { Box, Button, Typography } from '@mui/joy';
-import { getAuth, signOut } from "firebase/auth";
-import { app } from '../firebase';
+import { Box, Typography } from '@mui/joy';
 import { motion } from 'framer-motion';
 import "@fontsource/montserrat";
 import { useNavigate } from 'react-router-dom';
@@ -9,17 +7,7 @@ import Head from '../components/Head';
 const TextColor = '#3C007D';
 
 function News() {
-    const auth = getAuth(app);
     const navigate = useNavigate();
-
-    const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            navigate('/');
-        } catch (error: any) {
-            console.error('Ошибка при выходе:', error.message);
-        }
-    };
 
     return (
         <motion.div>
@@ -35,11 +23,6 @@ function News() {
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', fontSize: '18px', color: TextColor}}>Прочитать полностью</Typography>
                     </Box>
                 </Box>
-            </Box>
-            <Box>
-                <Button onClick={handleLogout}>
-                    Выйти
-                </Button>
             </Box>
         </motion.div>
     );

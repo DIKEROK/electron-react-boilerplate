@@ -10,6 +10,8 @@ import Regestration from './pages/Regestration';
 import About from './pages/About';
 import Background from './components/Background';
 import News from './pages/News';
+import Profile from './pages/Profile';
+import Friends from './pages/Friends';
 
 // Создаем отдельный компонент для роутинга
 function AppRoutes() {
@@ -47,6 +49,14 @@ function AppRoutes() {
                 <Route 
                     path="/about"
                     element={<About />}
+                />
+                <Route 
+                    path="/profile"
+                    element={<Profile />}
+                />
+                <Route 
+                    path="/friends"
+                    element={<Friends />}
                 />
             </Routes>
         </AnimatePresence>
