@@ -12,6 +12,7 @@ import Background from './components/Background';
 import News from './pages/News';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
+import ChatList from './pages/ChatList';
 
 // Создаем отдельный компонент для роутинга
 function AppRoutes() {
@@ -57,6 +58,10 @@ function AppRoutes() {
                 <Route 
                     path="/friends"
                     element={<Friends />}
+                />
+                <Route 
+                    path="/chatlist"
+                    element={<ChatList />}
                 />
             </Routes>
         </AnimatePresence>

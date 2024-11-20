@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import PersonIcon from '@mui/icons-material/Person';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 
 const TextColor = '#3C007D';
 
@@ -131,6 +132,10 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                     <Box onClick={() => navigate('/friends')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                         <GroupRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Друзья</Typography>
+                    </Box>
+                    <Box onClick={() => navigate('/chatlist')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <ForumRoundedIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Чаты</Typography>
                     </Box>
                 </Box>
             </motion.div>
