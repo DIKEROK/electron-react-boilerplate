@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { Box, Button, Divider, Input, Textarea, Typography } from '@mui/joy';
 import { motion } from 'framer-motion';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
@@ -53,7 +53,7 @@ function Login() {
         }
     };
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent | React.KeyboardEvent) => {
         e.preventDefault();
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -61,6 +61,12 @@ function Login() {
             console.log('Успешная авторизация:', user);
         } catch (error: any) {
             setError('Ошибка авторизации: ' + error.message);
+        }
+    };
+
+    const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleLogin(e);
         }
     };
 
@@ -86,6 +92,7 @@ function Login() {
                     <Input 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         placeholder='Введите почту'
                         slotProps={{
                             input: {
@@ -124,6 +131,7 @@ function Login() {
                         value={password}
                         type="password"
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         placeholder='Введите пароль'
                         slotProps={{
                             input: {
@@ -220,7 +228,7 @@ function Login() {
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '72px', color: TextColor}}>Мессенджер</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>Удобный мессенджер для</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>общения со студентами,</Typography>
-                    <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>большой функционал для</Typography>
+                    <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>��ольшой функционал для</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>быстрого обмена необходимой</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>информации!</Typography>
                     <Button

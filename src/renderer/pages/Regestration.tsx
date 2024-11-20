@@ -1,5 +1,5 @@
 import { Box, Button, Input, Typography } from '@mui/joy';
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { app } from '../firebase';
 import { motion } from 'framer-motion';
@@ -20,6 +20,12 @@ function Registration() {
     const navigate = useNavigate();
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleRegistration(e);
+        }
+    };
 
     const handleRegistration = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,7 +53,7 @@ function Registration() {
             });
 
             console.log('Пользователь успешно зарегистрирован');
-            navigate('/chat');
+            navigate('/profile');
         } catch (error: any) {
             let errorMessage = 'Произошла ошибка при регистрации';
             

@@ -1,8 +1,8 @@
-import { Avatar, Typography } from "@mui/joy";
+import { Avatar, Button, Typography } from "@mui/joy";
 import { Box } from "@mui/joy";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getAuth } from "firebase/auth";
+import { getAuth, signOut} from "firebase/auth";
 import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { app } from '../firebase';
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
-
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 const TextColor = '#3C007D';
 
 interface SideMenuProps {
@@ -29,6 +29,16 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
     const auth = getAuth(app);
     const db = getFirestore(app);
     const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            console.log('Успешный выход из системы');
+            navigate('/');
+        } catch (error: any) {
+            console.error('Ошибка при выходе:', error.message);
+        }
+    };
 
     useEffect(() => {
         const user = auth.currentUser;
@@ -134,6 +144,10 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                     <Box onClick={() => navigate('/chatlist')} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                         <ForumRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Чаты</Typography>
+                    </Box>
+                    <Box onClick={handleLogout} sx={{display: 'flex', alignItems: 'center', cursor: 'pointer', marginTop: '450px'}}>
+                        <LogoutRoundedIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Выйти из аккаунта</Typography>
                     </Box>
                 </Box>
             </motion.div>

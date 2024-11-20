@@ -1,14 +1,17 @@
 import { Box, Button } from '@mui/joy';
 import { getAuth, signOut } from "firebase/auth";
 import { app } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
     const auth = getAuth(app);
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await signOut(auth);
             console.log('Успешный выход из системы');
+            navigate('/');
         } catch (error: any) {
             console.error('Ошибка при выходе:', error.message);
         }
