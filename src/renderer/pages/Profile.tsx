@@ -109,7 +109,7 @@ function Profile() {
                 const friendsData = await Promise.all(
                     userData.friends.slice(0, 2).map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
-                        return friendDoc.data() as UserData;
+                        return { ...friendDoc.data(), uid: friendId } as UserData;
                     })
                 );
                 setFriends(friendsData);
