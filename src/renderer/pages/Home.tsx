@@ -1,4 +1,4 @@
-import { Button } from '@mui/joy';
+import { Box, Button } from '@mui/joy';
 import { getAuth, signOut } from "firebase/auth";
 import { app } from '../firebase';
 
@@ -15,7 +15,7 @@ function Home() {
     };
 
     return (
-        <div>
+        <Box>
             <h1>Домашняя страница</h1>
             <Button 
                 onClick={handleLogout}
@@ -26,7 +26,7 @@ function Home() {
             >
                 Выйти
             </Button>
-        </div>
+        </Box>
     );
 }
 

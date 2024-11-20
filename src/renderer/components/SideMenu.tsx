@@ -1,0 +1,128 @@
+import { Avatar, Typography } from "@mui/joy";
+import { Box } from "@mui/joy";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { getAuth } from "firebase/auth";
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { app } from '../firebase';
+import PersonIcon from '@mui/icons-material/Person';
+
+const TextColor = '#3C007D';
+
+interface SideMenuProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+interface UserData {
+    name: string;
+    surname: string;
+    photoURL?: string;
+}
+
+function SideMenu({isOpen, onClose}: SideMenuProps) {
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    setUserData(userDoc.data() as UserData);
+                }
+            }
+        };
+
+        fetchUserData();
+    }, [auth.currentUser]);
+
+    if (!isOpen) return null;
+
+    const getInitials = () => {
+        if (userData) {
+            const firstInitial = userData.name.charAt(0);
+            const lastInitial = userData.surname.charAt(0);
+            return `${firstInitial}${lastInitial}`.toUpperCase();
+        }
+        return '';
+    };
+
+    return (
+        <>
+            <motion.div
+                onClick={onClose}
+                initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                animate={{ opacity: 1, backdropFilter: 'blur(2px)' }}
+                exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                    zIndex: 900
+                }}
+            />
+            <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={{ x: '-100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '-100%', opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut", type: "spring" }}
+                style={{
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '250px',
+                    background: 'linear-gradient(to top, #FFC4EA, #F5D8FF)',
+                    borderRadius: '0 20px 20px 0',
+                    boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    justifyContent: 'center'
+                }}
+            >
+                <Box sx={{
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 2
+                }}>
+                    <Avatar
+                        src={userData?.photoURL}
+                        sx={{ 
+                            width: 80, 
+                            height: 80,
+                            fontSize: '1.5rem',
+                            background: 'linear-gradient(45deg, #959AFF, #D89EFF)'
+                        }}
+                    >
+                        {getInitials()}
+                    </Avatar>
+                    <Typography 
+                        level="h4" 
+                        sx={{
+                            fontFamily: 'Montserrat',
+                            color: TextColor
+                        }}
+                    >
+                        {userData ? `${userData.name} ${userData.surname}` : 'Загрузка...'}
+                    </Typography>
+                    <Box sx={{display: 'flex', alignItems: 'center', }}>
+                        <PersonIcon />
+                        <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Профиль</Typography>
+                    </Box>
+                </Box>
+            </motion.div>
+        </>
+    );
+}
+
+export default SideMenu;
