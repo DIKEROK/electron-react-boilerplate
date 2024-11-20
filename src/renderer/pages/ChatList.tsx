@@ -1,4 +1,4 @@
-import { Box, Button, Input } from '@mui/joy';
+import { Box, Button, Input, Typography } from '@mui/joy';
 import { getAuth, signOut } from "firebase/auth";
 import { app } from '../firebase';
 import Head from "../components/Head";
@@ -26,26 +26,61 @@ function ChatList() {
                                     borderColor: 'rgba(0, 0, 0, 0)',
                                     backgroundColor: '#F6EFFF', 
                                     borderRadius: '23px',
-                                    '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        borderRadius: '23px',
-                                        border: '2px solid transparent',
-                                        background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
-                                        WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
-                                        WebkitMaskComposite: 'destination-out',
-                                        maskComposite: 'exclude'
-                                    }
                                 }}>
                         </Box>
-                        
-
-
-                        
+                        <Box sx={{
+                            width: '277px', 
+                            height: '63px',
+                            position: 'relative',
+                            boxShadow: 'none',
+                            borderColor: 'rgba(0, 0, 0, 0)',
+                            backgroundColor: '#F6EFFF', 
+                            borderRadius: '23px',
+                            marginTop: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: '23px',
+                                border: '2px solid transparent',
+                                background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
+                                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                                WebkitMaskComposite: 'destination-out',
+                                maskComposite: 'exclude'
+                            }
+                        }}>
+                            <Box sx={{
+                                width: '37px', 
+                                height: '37px',
+                                background: 'linear-gradient(to left, #B689FF, #9137FF)',
+                                borderRadius: '100%',
+                                marginLeft: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                                <Typography sx={{
+                                    color: 'white',
+                                    fontFamily: 'Montserrat',
+                                    fontSize: '24px',
+                                }}>
+                                    +
+                                </Typography>
+                            </Box>
+                            <Typography sx={{
+                                color: {TextColor},
+                                fontFamily: 'Montserrat',
+                                fontSize: '16px',
+                                marginLeft: '10px',
+                            }}>
+                                Создать беседу
+                            </Typography>
+                        </Box>
                     </Box>
                     <Box sx={{display:'flex', flexDirection:'column'}}> 
                         <Box sx={{
@@ -110,35 +145,7 @@ function ChatList() {
                             }}
                         />
                     </Box>
-                </Box>
-                <Box >
-                <Box sx={{
-                            width: '277px', 
-                            height: '63px',
-                            position: 'relative',
-                            boxShadow: 'none',
-                            borderColor: 'rgba(0, 0, 0, 0)',
-                            backgroundColor: '#F6EFFF', 
-                            borderRadius: '23px',
-                            marginTop: '20px',
-                            '&::before': {
-                                content: '""',
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                borderRadius: '23px',
-                                border: '2px solid transparent',
-                                background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
-                                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
-                                WebkitMaskComposite: 'destination-out',
-                                maskComposite: 'exclude'
-                            }
-                        }}>
-                    </Box>
-                </Box>
-                
+                </Box>                
             </Box>
         </Box>
     );
