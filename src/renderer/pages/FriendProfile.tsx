@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { app } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getFirestore, collection, getDocs, query, where, orderBy } from "firebase/firestore";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 interface UserData {
+    uid?: string;
     name: string;
     surname: string;
     patronymic: string;
@@ -36,6 +37,7 @@ function FriendProfile() {
     const { friendId } = useParams();
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const navigate = useNavigate();
 
     const getInitials = () => {
         if (userData) {
@@ -67,7 +69,7 @@ function FriendProfile() {
                 const friendsData = await Promise.all(
                     userData.friends.slice(0, 2).map(async (friendId) => {
                         const friendDoc = await getDoc(doc(db, "users", friendId));
-                        return friendDoc.data() as UserData;
+                        return { ...friendDoc.data(), uid: friendId } as UserData;
                     })
                 );
                 setFriends(friendsData);
@@ -112,6 +114,10 @@ function FriendProfile() {
 
     const handleNextPost = () => {
         setCurrentPostIndex(prev => prev - 1);
+    };
+
+    const handleFriendClick = (friendId: string) => {
+        navigate(`/friend/${friendId}`);
     };
 
     return (
@@ -170,7 +176,20 @@ function FriendProfile() {
                         </Typography>
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
                             {friends.map((friend, index) => (
-                                <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
+                                <Box 
+                                    key={index} 
+                                    onClick={() => handleFriendClick(friend.uid!)}
+                                    sx={{
+                                        display: 'flex', 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center', 
+                                        gap: '10px',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                            opacity: 0.8
+                                        }
+                                    }}
+                                >
                                     <Avatar 
                                         src={friend.photoURL} 
                                         sx={{
