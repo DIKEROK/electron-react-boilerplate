@@ -33,6 +33,17 @@ function News() {
     const db = getFirestore(app);
     const navigate = useNavigate();
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     useEffect(() => {
         const fetchPosts = async () => {
             if (!auth.currentUser) return;
@@ -157,28 +168,46 @@ function News() {
                                 zIndex: -1
                             }
                         }}>
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                <Avatar 
-                                    src={post.author?.photoURL}
+                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                                    <Avatar 
+                                        src={post.author?.photoURL}
+                                        sx={{
+                                            width: 50,
+                                            height: 50,
+                                            background: 'linear-gradient(45deg, #959AFF, #D89EFF)',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => handleUserClick(post.userId)}
+                                    >
+                                        {post.author?.name?.[0]}{post.author?.surname?.[0]}
+                                    </Avatar>
+                                    <Typography sx={{cursor: 'pointer'}} onClick={() => handleUserClick(post.userId)} level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>
+                                        {post.author?.name} {post.author?.surname}
+                                    </Typography>
+                                </Box>
+                                <Typography 
+                                    level="body-sm" 
                                     sx={{
-                                        width: 50,
-                                        height: 50,
-                                        background: 'linear-gradient(45deg, #959AFF, #D89EFF)',
-                                        cursor: 'pointer'
+                                        fontFamily: 'Montserrat', 
+                                        color: TextColor,
+                                        opacity: 0.7
                                     }}
-                                    onClick={() => handleUserClick(post.userId)}
                                 >
+<<<<<<< HEAD
                                     {post.author?.name?.[0]}{post.author?.surname?.[0]}
                                 </Avatar>
                                 <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} onClick={() => handleUserClick(post.userId)} level="h4">
                                     {post.author?.name} {post.author?.surname}
+=======
+                                    {formatDate(post.createdAt)}
+>>>>>>> 131d05ba6f356b37e1bb4c63dd1e219b18b24063
                                 </Typography>
                             </Box>
                             
                             <Typography level="h3" sx={{fontFamily: 'Montserrat', color: TextColor}}>
                                 {post.title}
-                            </Typography>
-                            
+                            </Typography>                    
                             {post.imageUrl && (
                                 <Box sx={{
                                     width: '100%',
