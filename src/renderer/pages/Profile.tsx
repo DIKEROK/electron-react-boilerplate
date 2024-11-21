@@ -3,7 +3,7 @@ import Head from "../components/Head";
 import { useEffect, useState, useRef } from "react";
 import { app } from "../firebase";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, updateDoc, deleteDoc, getFirestore, collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc, getFirestore, collection, getDocs, query, where, orderBy, addDoc, arrayUnion } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import CreatePost from '../components/CreatePost';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -205,6 +205,95 @@ function Profile() {
         }
     };
 
+    const handleStartChat = async (friend: UserData) => {
+        if (!auth.currentUser) return;
+
+        try {
+            // Проверяем существующие личные чаты
+            const chatsRef = collection(db, "chats");
+            const q = query(
+                chatsRef,
+                where("members", "array-contains", auth.currentUser.uid),
+                where("isDirectMessage", "==", true)
+            );
+            const querySnapshot = await getDocs(q);
+            
+            let existingChat = null;
+            querySnapshot.forEach((doc) => {
+                const chatData = doc.data();
+                if (chatData.members.length === 2 && 
+                    chatData.members.includes(friend.uid!)) {
+                    existingChat = { id: doc.id, ...chatData };
+                }
+            });
+
+            if (existingChat) {
+                navigate(`/chat/${existingChat.id}`);
+                return;
+            }
+
+            // Получаем данные текущего пользователя
+            const currentUserDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const currentUserData = currentUserDoc.data() as UserData;
+
+            // Создаем новый личный чат
+            const newChat = {
+                name: `${friend.name} ${friend.surname}`,
+                displayName: `${friend.name} ${friend.surname}`,
+                createdBy: auth.currentUser.uid,
+                createdAt: new Date().toISOString(),
+                members: [auth.currentUser.uid, friend.uid!],
+                admins: [auth.currentUser.uid, friend.uid!],
+                messages: [],
+                photoURL: friend.photoURL || '',
+                isDirectMessage: true,
+                participants: {
+                    [auth.currentUser.uid]: {
+                        name: `${currentUserData.name} ${currentUserData.surname}`,
+                        photoURL: currentUserData.photoURL || ''
+                    },
+                    [friend.uid!]: {
+                        name: `${friend.name} ${friend.surname}`,
+                        photoURL: friend.photoURL || ''
+                    }
+                }
+            };
+
+            const docRef = await addDoc(collection(db, "chats"), newChat);
+            navigate(`/chat/${docRef.id}`);
+        } catch (error) {
+            console.error("Ошибка при создании чата:", error);
+        }
+    };
+
+    const sendMessage = async () => {
+        if (!message.trim() || !selectedChat || !auth.currentUser) return;
+        
+        try {
+            // Получаем данные текущего пользователя
+            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const userData = userDoc.data();
+            
+            const newMessage = {
+                id: Date.now().toString(),
+                text: message.trim(),
+                senderId: auth.currentUser.uid,
+                senderName: `${userData.name} ${userData.surname}`,
+                senderAvatar: userData.photoURL || '',
+                timestamp: new Date().toISOString()
+            };
+            
+            const chatRef = doc(db, "chats", selectedChat.id);
+            await updateDoc(chatRef, {
+                messages: arrayUnion(newMessage)
+            });
+            
+            setMessage('');
+        } catch (error) {
+            console.error("Ошибка при отправке сообщения:", error);
+        }
+    };
+
     return (
         <Box>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
@@ -296,17 +385,10 @@ function Profile() {
                                 <ArrowDropUpIcon sx={{ fontSize: 40 }} />
                             </Box>
                             
-                            {friends.slice(currentFriendIndex, currentFriendIndex + 2).map((friend, index) => (
-                                <Box onClick={() => navigate(`/friend/${friend.uid}`)} 
-                                    key={friend.uid} 
-                                    sx={{
-                                        display: 'flex', 
-                                        flexDirection: 'row', 
-                                        alignItems: 'center', 
-                                        gap: '10px',
-                                        cursor: 'pointer'
-                                    }}>
-                                    <Avatar 
+                            {friends.slice(currentFriendIndex, currentFriendIndex + 2).map((friend) => (
+                                <Box key={friend.uid} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+                                    <Avatar
+                                        onClick={() => navigate(`/friend/${friend.uid}`)}
                                         src={friend.photoURL} 
                                         sx={{
                                             width: 90, 
@@ -320,6 +402,18 @@ function Profile() {
                                     <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
                                         {friend.name} {friend.surname}
                                     </Typography>
+                                    <Button 
+                                        onClick={() => handleStartChat(friend)}
+                                        sx={{
+                                            fontFamily: 'Montserrat', 
+                                            background: 'linear-gradient(to left, #F480FF, #B14BFF)', 
+                                            borderRadius: '30px', 
+                                            width: '150px', 
+                                            height: '40px'
+                                        }}
+                                    >
+                                        Написать
+                                    </Button>
                                 </Box>
                             ))}
                             
@@ -363,7 +457,7 @@ function Profile() {
                     >
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center'}}>
                         <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
-                            Ваши посты
+                            Ваш посты
                         </Typography>
                     </Box>
                     
@@ -484,7 +578,6 @@ function Profile() {
                             У вас пока нет постов
                         </Typography>
                     )}
-
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', mt: 4}}>
                         <Button 
                             onClick={() => setIsCreatePostOpen(true)}

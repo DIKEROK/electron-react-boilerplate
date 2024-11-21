@@ -10,6 +10,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ManageChat from '../components/ManageChat';
 import { motion } from "framer-motion";
+import SendIcon from '@mui/icons-material/Send';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -324,36 +325,51 @@ function ChatList() {
                                 borderRadius: '4px',
                             }
                         }}>
-                            {chats.map(chat => (
-                                <Box 
-                                    key={chat.id}
-                                    onClick={() => setSelectedChat(chat)}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 2,
-                                        cursor: 'pointer',
-                                        padding: '10px',
-                                        borderRadius: '10px',
-                                        backgroundColor: selectedChat?.id === chat.id ? '#F6EFFF' : 'transparent',
-                                        '&:hover': {
-                                            backgroundColor: '#F6EFFF',
-                                        }
-                                    }}
-                                >
-                                    <Avatar
-                                        src={chat.photoURL}
-                                        sx={{ 
-                                            width: 50, 
-                                            height: 50,
-                                            background: 'linear-gradient(45deg, #959AFF, #D89EFF)'
+                            {chats.map(chat => {
+                                const isPrivate = chat.members.length === 2;
+                                let chatDisplayName = chat.name;
+                                let chatDisplayAvatar = chat.photoURL;
+
+                                if (isPrivate) {
+                                    const otherUserId = chat.members.find(id => id !== auth.currentUser?.uid);
+                                    const otherUser = friends.find(user => user.uid === otherUserId);
+                                    if (otherUser) {
+                                        chatDisplayName = `${otherUser.name} ${otherUser.surname}`;
+                                        chatDisplayAvatar = otherUser.photoURL;
+                                    }
+                                }
+
+                                return (
+                                    <Box 
+                                        key={chat.id}
+                                        onClick={() => setSelectedChat(chat)}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 2,
+                                            cursor: 'pointer',
+                                            padding: '10px',
+                                            borderRadius: '10px',
+                                            backgroundColor: selectedChat?.id === chat.id ? '#F6EFFF' : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: '#F6EFFF',
+                                            }
                                         }}
                                     >
-                                        {chat.name.charAt(0)}
-                                    </Avatar>
-                                    <Typography>{chat.name}</Typography>
-                                </Box>
-                            ))}
+                                        <Avatar
+                                            src={chatDisplayAvatar}
+                                            sx={{ 
+                                                width: 50, 
+                                                height: 50,
+                                                background: 'linear-gradient(45deg, #959AFF, #D89EFF)'
+                                            }}
+                                        >
+                                            {chatDisplayName.charAt(0)}
+                                        </Avatar>
+                                        <Typography>{chatDisplayName}</Typography>
+                                    </Box>
+                                )
+                            })}
                         </Box>
                         <Box
                             onClick={() => setIsCreateModalOpen(true)}
@@ -587,10 +603,13 @@ function ChatList() {
                                     sx={{
                                         backgroundColor: '#B689FF',
                                         color: 'white',
+                                        borderRadius: '100%',
+                                        width: '50px',
+                                        height: '50px',
                                         '&:hover': { backgroundColor: '#9137FF' }
                                     }}
                                 >
-                                    Отправить
+                                    <SendIcon />
                                 </Button>
                             </Box>
                         </Box>
