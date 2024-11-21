@@ -228,7 +228,7 @@ function Login() {
                     <Typography level="h1" sx={{fontFamily: "Montserrat", fontSize: '72px', color: TextColor}}>Мессенджер</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>Удобный мессенджер для</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>общения со студентами,</Typography>
-                    <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>��ольшой функционал для</Typography>
+                    <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>Большой функционал для</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>быстрого обмена необходимой</Typography>
                     <Typography level="h3" sx={{fontFamily: "Montserrat", fontSize: '32px', color: TextColor}}>информации!</Typography>
                     <Button

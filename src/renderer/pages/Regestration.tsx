@@ -30,6 +30,11 @@ function Registration() {
     const handleRegistration = async (e: React.FormEvent) => {
         e.preventDefault();
         
+        if (!name || !surname || !email || !password || !confirmPassword) {
+            setError('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('Пароли не совпадают');
             return;
@@ -98,6 +103,7 @@ function Registration() {
                         type='text'
                         onChange={(e) => setName(e.target.value)}
                         placeholder='Введите имя'
+                        required
                         slotProps={{
                             input: {
                                 style: {
@@ -131,7 +137,13 @@ function Registration() {
                             }
                         }}
                     />
-                    <Input value={surname} type='text' onChange={(e) => setSurname(e.target.value)} placeholder='Введите фамилию' slotProps={{
+                    <Input 
+                        value={surname} 
+                        type='text' 
+                        onChange={(e) => setSurname(e.target.value)} 
+                        placeholder='Введите фамилию' 
+                        required
+                        slotProps={{
                             input: {
                                 style: {
                                     textAlign: 'center',
@@ -164,7 +176,12 @@ function Registration() {
                             }
                         }}
                     />
-                    <Input placeholder='Введите отчество' type='text' value={patronymic} onChange={(e) => setPatronymic(e.target.value)} slotProps={{
+                    <Input 
+                        placeholder='Введите отчество' 
+                        type='text' 
+                        value={patronymic} 
+                        onChange={(e) => setPatronymic(e.target.value)} 
+                        slotProps={{
                             input: {
                                 style: {
                                     textAlign: 'center',
@@ -197,7 +214,13 @@ function Registration() {
                             }
                         }}
                     />
-                    <Input placeholder='Введите почту' type='email' value={email} onChange={(e) => setEmail(e.target.value)} slotProps={{
+                    <Input 
+                        placeholder='Введите почту' 
+                        type='email' 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        required
+                        slotProps={{
                             input: {
                                 style: {
                                     textAlign: 'center',
@@ -230,7 +253,13 @@ function Registration() {
                             }
                         }}
                     />
-                    <Input placeholder='Введите пароль' type='password' value={password} onChange={(e) => setPassword(e.target.value)} slotProps={{
+                    <Input 
+                        placeholder='Введите пароль' 
+                        type='password' 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        required
+                        slotProps={{
                             input: {
                                 style: {
                                     textAlign: 'center',
@@ -263,7 +292,13 @@ function Registration() {
                             }
                         }}
                     />
-                    <Input placeholder='Подтвердите пароль' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} slotProps={{
+                    <Input 
+                        placeholder='Подтвердите пароль' 
+                        type='password' 
+                        value={confirmPassword} 
+                        onChange={(e) => setConfirmPassword(e.target.value)} 
+                        required
+                        slotProps={{
                             input: {
                                 style: {
                                     textAlign: 'center',
