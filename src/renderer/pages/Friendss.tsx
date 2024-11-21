@@ -1,4 +1,4 @@
-import { Box, Typography, Input, Avatar } from "@mui/joy";
+import { Box, Typography, Input, Avatar, Button } from "@mui/joy";
 import { motion } from "framer-motion";
 import "@fontsource/jockey-one/400.css";
 import "@fontsource/montserrat";
@@ -11,6 +11,20 @@ const TextColor = '#3C007D';
 
 function Friendss() {
     const [searchEmail, setSearchEmail] = useState('');
+    const [searchResult, setSearchResult] = useState<Array<{
+        uid?: string;
+        name: string;
+        surname: string;
+        photoURL?: string;
+    }>>([]);
+    const [userData, setUserData] = useState<{
+        friends: string[];
+    }>({ friends: [] });
+
+    const sendFriendRequest = async (uid: string) => {
+        // Здесь добавьте логику отправки запроса в друзья
+        console.log('Отправка запроса в друзья:', uid);
+    };
 
     return (
         <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} transition={{duration: 0.6}}>
@@ -119,11 +133,11 @@ function Friendss() {
                     </Box>
                 </Box>
 
-                <Box sx={{margin: '0 auto', maxWidth: '800px'}}>
+                <Box sx={{margin: '0 auto', maxWidth: '800px', left: '25%', position: 'absolute'}}>
                     <Input 
                         value={searchEmail}
                         onChange={(e) => setSearchEmail(e.target.value)}
-                        placeholder="Введите имя и фамилию"
+                        placeholder="Поиск студентов"
                         slotProps={{
                             input: {
                                 style: {
@@ -134,7 +148,7 @@ function Friendss() {
                         }}
                         sx={{
                             width: '300px', 
-                            height: '70px',
+                            height: '60px',
                             marginBottom: '20px',
                             position: 'relative',
                             padding: '15px 20px',
@@ -148,9 +162,8 @@ function Friendss() {
                                 left: 0,
                                 right: 0,
                                 bottom: 0,
-                                borderRadius: '60px',
-                                padding: '15px 20px',
-                                border: '2px solid transparent',
+                                borderRadius: '20px', 
+                                border: '2px solid rgba(60, 0, 165, 0.05)',
                                 background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
                                 WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
                                 WebkitMaskComposite: 'destination-out',
@@ -158,6 +171,30 @@ function Friendss() {
                             }
                         }}
                     />
+                    {searchResult.length > 0 && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: '30px' }}>
+                            {searchResult.map((user) => (
+                                <Box key={user.uid} sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 2,
+                                    padding: '10px',
+                                    borderRadius: '10px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }}>
+                                    <Avatar src={user.photoURL} />
+                                    <Typography>
+                                        {`${user.name} ${user.surname}`}
+                                    </Typography>
+                                    {!userData?.friends.includes(user.uid!) && (
+                                        <Button onClick={() => sendFriendRequest(user.uid!)}>
+                                            Добавить в друзья
+                                        </Button>
+                                    )}
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
 
                     {/* Карточка пользователя */}
                     <Box sx={{
@@ -165,9 +202,10 @@ function Friendss() {
                         alignItems: 'center',
                         gap: 2,
                         padding: '20px',
-                        borderRadius: '15px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        marginBottom: '20px'
+                        backgroundColor: '#F4D9FF',
+                        marginBottom: '20px',
+                        borderRadius: '20px',
+                        border: '2px solid rgba(60, 0, 165, 0.05)',
                     }}>
                         <Avatar sx={{width: 50, height: 50}} />
                         <Typography sx={{fontFamily: 'Montserrat', color: TextColor}}>

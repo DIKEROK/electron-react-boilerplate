@@ -169,7 +169,7 @@ function SideMenu({isOpen, onClose}: SideMenuProps) {
                         <ArticleRoundedIcon />
                         <Typography level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>Новости</Typography>
                     </Box>
-                    <Box onClick={() => navigate('/friendss')} sx={{
+                    <Box onClick={() => navigate('/friends')} sx={{
                         display: 'flex', 
                         alignItems: 'center', 
                         cursor: 'pointer',

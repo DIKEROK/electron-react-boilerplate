@@ -11,7 +11,7 @@ import About from './pages/About';
 import Background from './components/Background';
 import News from './pages/News';
 import Profile from './pages/Profile';
-import Friendss from './pages/Friendss';
+import Friends from './pages/Friends';
 import FriendProfile from './pages/FriendProfile';
 import ChatList from './pages/ChatList';
 import EditProfile from './pages/EditProfile';
@@ -58,8 +58,8 @@ function AppRoutes() {
                     element={<Profile />}
                 />
                 <Route 
-                    path="/friendss"
-                    element={<Friendss />}
+                    path="/friends"
+                    element={<Friends />}
                 />
                 <Route 
                     path="/chatlist"

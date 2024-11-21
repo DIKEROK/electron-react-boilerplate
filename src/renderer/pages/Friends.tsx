@@ -7,6 +7,7 @@ import { getFirestore, onSnapshot } from "firebase/firestore";
 import { app } from "../firebase";
 import { getDoc, doc, collection, getDocs, updateDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 const TextColor = '#3C007D';
 interface UserData {
@@ -211,17 +212,153 @@ function Friends() {
                 <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
                     <Head />
                 </Box>
-                <Box sx={{padding: '20px'}}>
-                    <Typography level="h2" sx={{fontFamily: 'Montserrat', color: TextColor, marginBottom: '20px'}}>
-                        Поиск друзей
-                    </Typography>
-                    <Box sx={{display: 'flex', gap: 2, marginBottom: '30px'}}>
-                        <Input
-                            value={searchEmail}
-                            onChange={(e) => setSearchEmail(e.target.value)}
-                            placeholder="Введите имя и фамилию"
-                            sx={{width: '300px'}}
-                        />
+                <Box sx={{
+                    width: '170px', 
+                    height: '557px', 
+                    position: 'absolute', 
+                    padding: '20px', 
+                    borderRadius: '20px', 
+                    border: '2px solid rgba(60, 0, 165, 0.05)',
+                    backgroundColor: '#F4D9FF'}}>
+                        <Box sx={{
+                           display: 'flex',
+                           flexDirection: 'column',
+                           gap: '10px',
+                        }}>
+                            <Typography sx={{
+                                fontFamily: 'Montserrat',
+                                color: 'white',
+                                background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                padding: '10px 20px',
+                                borderRadius: '30px',
+                                textAlign: 'center',
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    borderRadius: '30px',
+                                    boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
+                                    width: '100%',
+                                    height: '100%',
+                                    pointerEvents: 'none'
+                                }
+                            }}>
+                                Курс
+                            </Typography>
+                            <Box sx={{
+                           display: 'flex',
+                           flexDirection: 'column',
+                           gap: '10px'
+                        }}>
+                            <Typography sx={{
+                                fontFamily: 'Montserrat',
+                                color: 'white',
+                                background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                padding: '10px 20px',
+                                borderRadius: '30px',
+                                textAlign: 'center',
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    borderRadius: '30px',
+                                    boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
+                                    width: '100%',
+                                    height: '100%',
+                                    pointerEvents: 'none'
+                                }
+                            }}>
+                                Колледж
+                            </Typography>
+                            <Box sx={{
+                           display: 'flex',
+                           flexDirection: 'column',
+                           gap: '10px'
+                        }}>
+                            <Typography sx={{
+                                fontFamily: 'Montserrat',
+                                color: 'white',
+                                background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                padding: '10px 20px',
+                                borderRadius: '30px',
+                                textAlign: 'center',
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    borderRadius: '30px',
+                                    boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
+                                    width: '100%',
+                                    height: '100%',
+                                    pointerEvents: 'none'
+                                }
+                            }}>
+                                Специальность
+                            </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+                <Box sx={{margin: '0 auto', maxWidth: '800px', left: '25%', position: 'absolute'}}>
+                    
+                    
+                    <Box sx={{
+                        display: 'flex', 
+                        gap: 2, 
+                        
+                        
+                    }}>
+                    <Input 
+                        value={searchEmail}
+                        onChange={(e) => setSearchEmail(e.target.value)}
+                        placeholder="Поиск студентов"
+                        startDecorator={<SearchRoundedIcon sx={{color: 'black'}} />}
+                        slotProps={{
+                            input: {
+                                style: {
+                                    textAlign: 'left',
+                                    fontFamily: 'Montserrat'
+                                }
+                            }
+                        }}
+                        sx={{
+                            width: '300px', 
+                            height: '60px',
+                            marginBottom: '20px',
+                            position: 'relative',
+                            padding: '15px 20px',
+                            boxShadow: 'none',
+                            borderColor: 'rgba(0, 0, 0, 0)',
+                            backgroundColor: 'transparent', 
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: '20px', 
+                                border: '2px solid rgba(60, 0, 165, 0.05)',
+                                background: 'linear-gradient(45deg, #8400FF, #FF00F6) border-box',
+                                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                                WebkitMaskComposite: 'destination-out',
+                                maskComposite: 'exclude'
+                            }
+                        }}
+                    >
+                    </Input>
                     </Box>
 
                     {searchResult.length > 0 && (
@@ -232,15 +369,22 @@ function Friends() {
                                     alignItems: 'center',
                                     gap: 2,
                                     padding: '10px',
-                                    borderRadius: '10px',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    borderRadius: '20px',
+                                    border: '2px solid rgba(60, 0, 165, 0.05)',
+                                    backgroundColor: 'rgba(244, 217, 255, 1)',
+                                    width: '275px',
+                                    height: '80px',
+                                    marginTop: '-5px'
                                 }}>
-                                    <Avatar src={user.photoURL} />
-                                    <Typography>
+                                    <Avatar src={user.photoURL} sx={{height: '80px', width: '80px', marginLeft: '10px'}}/>
+                                    <Typography level="h4" sx={{fontFamily: 'Montserrat', color: 'black', height: '100%', fontSize: '15px'}}>
                                         {`${user.name} ${user.surname}`}
                                     </Typography>
                                     {!userData?.friends.includes(user.uid!) && (
-                                        <Button onClick={() => sendFriendRequest(user.uid!)}>
+                                        <Button onClick={() => sendFriendRequest(user.uid!)} sx={{
+                                            height: '30px',
+                                            width: '100px',
+                                            }}>
                                             Добавить в друзья
                                         </Button>
                                     )}
@@ -249,9 +393,7 @@ function Friends() {
                         </Box>
                     )}
 
-                    <Typography level="h3" sx={{fontFamily: 'Montserrat', color: TextColor, marginBottom: '20px'}}>
-                        Запросы в друзья ({friendRequests.length})
-                    </Typography>
+                    
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, marginBottom: '30px'}}>
                         {friendRequests.map((request) => (
                             <Box key={request.email} sx={{
@@ -280,7 +422,7 @@ function Friends() {
                             </Box>
                         ))}
                     </Box>
-
+                        
                     <Typography level="h3" sx={{fontFamily: 'Montserrat', color: TextColor, marginBottom: '20px'}}>
                         Мои друзья ({friends.length})
                     </Typography>
