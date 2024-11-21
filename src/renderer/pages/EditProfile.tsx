@@ -19,6 +19,7 @@ function EditProfile({ isOpen, onClose }: { isOpen: boolean, onClose: () => void
     const [course, setCourse] = useState('');
     const [college, setCollege] = useState('');
     const [job, setJob] = useState('');
+    const [isTeacher, setIsTeacher] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const storage = getStorage();
     const auth = getAuth();
@@ -77,6 +78,20 @@ function EditProfile({ isOpen, onClose }: { isOpen: boolean, onClose: () => void
         }
     };
 
+    const handleTeacherStatus = async () => {
+        if (!userId) return;
+        
+        try {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, {
+                isTeacher: !isTeacher
+            });
+            setIsTeacher(!isTeacher);
+        } catch (error) {
+            console.error('Ошибка при обновлении статуса преподавателя:', error);
+        }
+    };
+
     useEffect(() => {
         const loadUserData = async () => {
             if (!userId) return;
@@ -92,6 +107,7 @@ function EditProfile({ isOpen, onClose }: { isOpen: boolean, onClose: () => void
                     setCollege(userData.college || '');
                     setJob(userData.job || '');
                     setPhotoURL(userData.photoURL || '');
+                    setIsTeacher(userData.isTeacher || false);
                 }
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
@@ -497,6 +513,22 @@ function EditProfile({ isOpen, onClose }: { isOpen: boolean, onClose: () => void
                         }}
                     >
                         Сохранить изменения
+                    </Button>
+
+                    <Button 
+                        onClick={handleTeacherStatus}
+                        variant="plain"
+                        sx={{ 
+                            marginTop: '20px',
+                            paddingInline: '10px', 
+                            fontFamily: 'Montserrat', 
+                            fontSize: '20px', 
+                            background: 'linear-gradient(to left, #8400FF, #FF00F6)', 
+                            '-webkit-background-clip': 'text', 
+                            '-webkit-text-fill-color': 'transparent',
+                        }}
+                    >
+                        {isTeacher ? 'Я не преподаватель' : 'Я преподаватель'}
                     </Button>
                 </Box>
             </motion.div>
