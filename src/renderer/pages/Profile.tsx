@@ -482,6 +482,7 @@ function Profile() {
                     >
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center'}}>
                         <Box sx={{ 
+                            
                             display: 'flex', 
                             width: '100%',
                             justifyContent: 'space-between', 
@@ -522,23 +523,9 @@ function Profile() {
                             }}>
                                 
                                 
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start', mt: 4 }}>
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        gap: '10px',
-                                        width: '100%',
-                                        textAlign: 'center',
-                                        position: 'absolute',
-                                        top: '30px',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)'
-                                    }}>
-                                        <Typography level="h3" sx={{
-                                            fontFamily: 'Montserrat', 
-                                            fontSize: '22px', 
-                                            color: '#3C007D'
-                                        }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', alignItems: 'flex-start', mt: 4 }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px', color: '#3C007D'}}>
                                             {posts[currentPostIndex]?.title}
                                         </Typography>
                                     </Box>
@@ -644,7 +631,13 @@ function Profile() {
                             У вас пока нет постов
                         </Typography>
                     )}
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', mt: 4}}>
+                    <Box sx={{
+                        position: 'absolute',
+                        bottom: '20px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 1000
+                    }}>
                         <Button 
                             onClick={() => setIsCreatePostOpen(true)}
                             sx={{
