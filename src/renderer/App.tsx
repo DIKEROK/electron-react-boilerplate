@@ -69,6 +69,10 @@ function AppRoutes() {
                     path="/friend/:friendId"
                     element={<FriendProfile />}
                 />
+                <Route 
+                    path="/chat/:chatId"
+                    element={<ChatList />}
+                />
             </Routes>
         </AnimatePresence>
     );
