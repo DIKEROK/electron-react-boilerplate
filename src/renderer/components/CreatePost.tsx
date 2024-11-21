@@ -19,7 +19,7 @@ const POST_THEMES = [
     { id: 'study', label: 'Учеба', color: '#FF80F2' },
     { id: 'events', label: 'Мероприятия', color: '#80ACFF' },
     { id: 'projects', label: 'Проекты', color: '#80FFB6' },
-    { id: 'career', label: 'Карьера', color: '#FFB680' },
+    { id: 'career', label: 'Спорт', color: '#FFB680' },
     { id: 'questions', label: 'Вопросы', color: '#FF8080' },
     { id: 'other', label: 'Другое', color: '#B680FF' }
 ];

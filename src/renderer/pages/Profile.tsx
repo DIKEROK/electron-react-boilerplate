@@ -52,10 +52,13 @@ interface PostTheme {
     color: string;
 }
 
-const POST_THEMES: PostTheme[] = [
-    { id: 'study', label: 'Учеба', color: '#B680FF' },
-    { id: 'work', label: 'Работа', color: '#80FFB6' },
-    { id: 'other', label: 'Другое', color: '#FF80B6' }
+const POST_THEMES = [
+    { id: 'study', label: 'Учеба', color: '#FF80F2' },
+    { id: 'events', label: 'Мероприятия', color: '#80ACFF' },
+    { id: 'projects', label: 'Проекты', color: '#80FFB6' },
+    { id: 'career', label: 'Спорт', color: '#FFB680' },
+    { id: 'questions', label: 'Вопросы', color: '#FF8080' },
+    { id: 'other', label: 'Другое', color: '#B680FF' }
 ];
 
 function Profile() {
@@ -520,8 +523,22 @@ function Profile() {
                                 
                                 
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start', mt: 4 }}>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px', color: '#3C007D'}}>
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        gap: '10px',
+                                        width: '100%',
+                                        textAlign: 'center',
+                                        position: 'absolute',
+                                        top: '30px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)'
+                                    }}>
+                                        <Typography level="h3" sx={{
+                                            fontFamily: 'Montserrat', 
+                                            fontSize: '22px', 
+                                            color: '#3C007D'
+                                        }}>
                                             {posts[currentPostIndex]?.title}
                                         </Typography>
                                     </Box>
@@ -529,7 +546,9 @@ function Profile() {
                                         onClick={() => handleDeletePost(posts[currentPostIndex].id)}
                                         sx={{
                                             fontFamily: 'Montserrat',
-                                            marginBottom: '50px',
+                                            position: 'absolute',
+                                            top: '-10px',
+                                            right: '0',
                                             minWidth: '40px',
                                             height: '40px',
                                             borderRadius: '50%',
