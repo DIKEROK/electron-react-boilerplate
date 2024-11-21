@@ -1,4 +1,4 @@
-import { Box, Typography, Avatar } from '@mui/joy';
+import { Box, Typography, Avatar, Button } from '@mui/joy';
 import { motion } from 'framer-motion';
 import "@fontsource/montserrat";
 import { useState, useEffect } from 'react';
@@ -19,6 +19,7 @@ interface Post {
     createdAt: string;
     likes: number;
     comments: any[];
+    theme: string;
     author?: {
         name: string;
         surname: string;
@@ -26,9 +27,19 @@ interface Post {
     };
 }
 
+const POST_THEMES = [
+    { id: 'study', label: 'Учеба', color: '#FF80F2' },
+    { id: 'events', label: 'Мероприятия', color: '#80ACFF' },
+    { id: 'projects', label: 'Проекты', color: '#80FFB6' },
+    { id: 'career', label: 'Карьера', color: '#FFB680' },
+    { id: 'questions', label: 'Вопросы', color: '#FF8080' },
+    { id: 'other', label: 'Другое', color: '#B680FF' }
+];
+
 function News() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [hasFriends, setHasFriends] = useState<boolean | null>(null);
+    const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const navigate = useNavigate();
@@ -100,11 +111,54 @@ function News() {
         navigate(`/friend/${userId}`);
     };
 
+    const filteredPosts = selectedTheme 
+        ? posts.filter(post => post.theme === selectedTheme)
+        : posts;
+
     return (
         <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} transition={{duration: 0.6}}>
             <Box sx={{display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '50px'}}>
                 <Head />
             </Box>
+            
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: 2, 
+                marginBottom: '30px',
+                marginTop: '50px'
+            }}>
+                <Button
+                    onClick={() => setSelectedTheme(null)}
+                    sx={{
+                        fontFamily: 'Montserrat',
+                        backgroundColor: !selectedTheme ? 'rgba(132, 0, 255, 0.1)' : 'transparent',
+                        color: TextColor,
+                        '&:hover': {
+                            backgroundColor: 'rgba(132, 0, 255, 0.1)'
+                        }
+                    }}
+                >
+                    Все
+                </Button>
+                {POST_THEMES.map((theme) => (
+                    <Button
+                        key={theme.id}
+                        onClick={() => setSelectedTheme(theme.id)}
+                        sx={{
+                            fontFamily: 'Montserrat',
+                            backgroundColor: selectedTheme === theme.id ? `${theme.color}15` : 'transparent',
+                            color: theme.color,
+                            '&:hover': {
+                                backgroundColor: `${theme.color}15`
+                            }
+                        }}
+                    >
+                        {theme.label}
+                    </Button>
+                ))}
+            </Box>
+
             {hasFriends === false ? (
                 <Box sx={{
                     display: 'flex',
@@ -123,7 +177,7 @@ function News() {
                         Вы пока не подписаны ни на одного друга!
                     </Typography>
                 </Box>
-            ) : posts.length === 0 ? (
+            ) : filteredPosts.length === 0 ? (
                 <Box sx={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -143,7 +197,7 @@ function News() {
                 </Box>
             ) : (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 4, padding: '20px'}}>
-                    {posts.map((post) => (
+                    {filteredPosts.map((post) => (
                         <Box key={post.id} sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -182,20 +236,35 @@ function News() {
                                     >
                                         {post.author?.name?.[0]}{post.author?.surname?.[0]}
                                     </Avatar>
-                                    <Typography sx={{cursor: 'pointer'}} onClick={() => handleUserClick(post.userId)} level="h4" sx={{fontFamily: 'Montserrat', color: TextColor}}>
+                                    <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} onClick={() => handleUserClick(post.userId)} level="h4">
                                         {post.author?.name} {post.author?.surname}
                                     </Typography>
                                 </Box>
-                                <Typography 
-                                    level="body-sm" 
-                                    sx={{
-                                        fontFamily: 'Montserrat', 
-                                        color: TextColor,
-                                        opacity: 0.7
-                                    }}
-                                >
-                                    {formatDate(post.createdAt)}
-                                </Typography>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                                    <Typography 
+                                        level="body-sm" 
+                                        sx={{
+                                            fontFamily: 'Montserrat', 
+                                            color: TextColor,
+                                            opacity: 0.7
+                                        }}
+                                    >
+                                        {formatDate(post.createdAt)}
+                                    </Typography>
+                                    <Typography
+                                        level="body-sm"
+                                        sx={{
+                                            fontFamily: 'Montserrat',
+                                            color: POST_THEMES.find(theme => theme.id === post.theme)?.color || '#B680FF',
+                                            backgroundColor: `${POST_THEMES.find(theme => theme.id === post.theme)?.color}15` || '#B680FF15',
+                                            padding: '4px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '12px'
+                                        }}
+                                    >
+                                        {POST_THEMES.find(theme => theme.id === post.theme)?.label || 'Другое'}
+                                    </Typography>
+                                </Box>
                             </Box>
                             
                             <Typography level="h3" sx={{fontFamily: 'Montserrat', color: TextColor}}>

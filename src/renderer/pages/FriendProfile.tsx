@@ -17,6 +17,9 @@ interface UserData {
     patronymic: string;
     photoURL?: string;
     friends?: string[];
+    course?: string;
+    college?: string;
+    job?: string;
 }
 
 interface Post {
@@ -28,7 +31,17 @@ interface Post {
     userId: string;
     likes: number;
     comments: any[];
+    theme: string;
 }
+
+const POST_THEMES = [
+    { id: 'study', label: 'Учеба', color: '#FF80F2' },
+    { id: 'events', label: 'Мероприятия', color: '#80ACFF' },
+    { id: 'projects', label: 'Проекты', color: '#80FFB6' },
+    { id: 'career', label: 'Карьера', color: '#FFB680' },
+    { id: 'questions', label: 'Вопросы', color: '#FF8080' },
+    { id: 'other', label: 'Другое', color: '#B680FF' }
+];
 
 function FriendProfile() {
     const [userData, setUserData] = useState<UserData | null>(null);
@@ -148,10 +161,17 @@ function FriendProfile() {
                         >
                             {getInitials()}
                         </Avatar>
-                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px'}}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                             <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
                                 <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.surname}</Typography>
                                 <Typography level="h1" sx={{fontFamily: 'Montserrat'}}>{userData?.name}</Typography>
+                            </Box>
+                            <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '5px'}}>
+                                <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>Студент {userData?.course} Курса,</Typography>
+                                <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>{userData?.college}</Typography>
+                            </Box>
+                            <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '5px', marginBottom: '20px'}}>
+                                <Typography level="h4" sx={{fontFamily: 'Montserrat'}}>{userData?.job}</Typography>
                             </Box>
                         </Box>
                     </Box>
@@ -253,9 +273,30 @@ function FriendProfile() {
                     }
                 }}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center'}}>
-                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
-                            Посты
-                        </Typography>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            width: '100%',
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            marginBottom: '20px'
+                        }}>
+                            <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
+                                Посты
+                            </Typography>
+                            <Typography
+                                level="body-sm"
+                                sx={{
+                                    fontFamily: 'Montserrat',
+                                    color: POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.color || '#B680FF',
+                                    backgroundColor: `${POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.color}15` || '#B680FF15',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                {POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.label || 'Другое'}
+                            </Typography>
+                        </Box>
                     </Box>
                     
                     {posts.length > 0 ? (
@@ -271,9 +312,12 @@ function FriendProfile() {
                                 minHeight: '300px',
                                 position: 'relative'
                             }}>
-                                <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
-                                    {posts[currentPostIndex]?.title}
-                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px'}}>
+                                        {posts[currentPostIndex]?.title}
+                                    </Typography>
+                                    
+                                </Box>
                                 
                                 {posts[currentPostIndex]?.imageUrl && (
                                     <Box sx={{

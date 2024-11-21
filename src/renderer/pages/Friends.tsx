@@ -676,7 +676,7 @@ function Friends() {
                                             }
                                         }}
                                     >
-                                        Удалит
+                                        Удалить
                                     </Button>
                                 </Box>
                             ))}

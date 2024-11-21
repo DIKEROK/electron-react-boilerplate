@@ -15,6 +15,15 @@ interface CreatePostProps {
     onPostCreated: () => void;
 }
 
+const POST_THEMES = [
+    { id: 'study', label: 'Учеба', color: '#FF80F2' },
+    { id: 'events', label: 'Мероприятия', color: '#80ACFF' },
+    { id: 'projects', label: 'Проекты', color: '#80FFB6' },
+    { id: 'career', label: 'Карьера', color: '#FFB680' },
+    { id: 'questions', label: 'Вопросы', color: '#FF8080' },
+    { id: 'other', label: 'Другое', color: '#B680FF' }
+];
+
 function CreatePost({ onClose, onPostCreated }: CreatePostProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -22,6 +31,7 @@ function CreatePost({ onClose, onPostCreated }: CreatePostProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [selectedTheme, setSelectedTheme] = useState(POST_THEMES[0].id);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const auth = getAuth(app);
@@ -63,7 +73,8 @@ function CreatePost({ onClose, onPostCreated }: CreatePostProps) {
                 imageUrl,
                 createdAt: new Date().toISOString(),
                 likes: 0,
-                comments: []
+                comments: [],
+                theme: selectedTheme
             });
 
             setTitle('');
@@ -111,6 +122,28 @@ function CreatePost({ onClose, onPostCreated }: CreatePostProps) {
                 <Typography level="h2" sx={{fontFamily: 'Montserrat', color: TextColor, marginBottom: '20px'}}>
                     Создание поста
                 </Typography>
+
+                <Box sx={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                    {POST_THEMES.map((theme) => (
+                        <Button
+                            key={theme.id}
+                            onClick={() => setSelectedTheme(theme.id)}
+                            sx={{
+                                fontFamily: 'Montserrat',
+                                backgroundColor: selectedTheme === theme.id ? theme.color : 'transparent',
+                                color: selectedTheme === theme.id ? 'white' : 'black',
+                                border: `2px solid ${theme.color}`,
+                                borderRadius: '20px',
+                                '&:hover': {
+                                    backgroundColor: theme.color,
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            {theme.label}
+                        </Button>
+                    ))}
+                </Box>
                 
                 <Input
                     value={title}

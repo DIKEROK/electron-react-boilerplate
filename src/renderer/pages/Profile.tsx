@@ -37,11 +37,32 @@ interface Post {
     userId: string;
     likes: number;
     comments: any[];
+    theme: string;
 }
+
+interface Chat {
+    id: string;
+    members: string[];
+    isDirectMessage: boolean;
+}
+
+interface PostTheme {
+    id: string;
+    label: string;
+    color: string;
+}
+
+const POST_THEMES: PostTheme[] = [
+    { id: 'study', label: 'Учеба', color: '#B680FF' },
+    { id: 'work', label: 'Работа', color: '#80FFB6' },
+    { id: 'other', label: 'Другое', color: '#FF80B6' }
+];
 
 function Profile() {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [selectedChat, setSelectedChat] = useState<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -218,12 +239,12 @@ function Profile() {
             );
             const querySnapshot = await getDocs(q);
             
-            let existingChat = null;
+            let existingChat: Chat | null = null;
             querySnapshot.forEach((doc) => {
-                const chatData = doc.data();
+                const chatData = { id: doc.id, ...doc.data() } as Chat;
                 if (chatData.members.length === 2 && 
                     chatData.members.includes(friend.uid!)) {
-                    existingChat = { id: doc.id, ...chatData };
+                    existingChat = chatData;
                 }
             });
 
@@ -273,6 +294,7 @@ function Profile() {
             // Получаем данные текущего пользователя
             const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
             const userData = userDoc.data();
+            if (!userData) return;
             
             const newMessage = {
                 id: Date.now().toString(),
@@ -456,9 +478,30 @@ function Profile() {
                         }}
                     >
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center'}}>
-                        <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
-                            Ваш посты
-                        </Typography>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            width: '100%',
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            marginBottom: '20px'
+                        }}>
+                            <Typography level="h2" sx={{fontFamily: 'Montserrat', fontSize: '30px'}}>
+                                Ваши посты
+                            </Typography>
+                            <Typography
+                                level="body-sm"
+                                sx={{
+                                    fontFamily: 'Montserrat',
+                                    color: POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.color || '#B680FF',
+                                    backgroundColor: `${POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.color}15` || '#B680FF15',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                {POST_THEMES.find(theme => theme.id === posts[currentPostIndex]?.theme)?.label || 'Другое'}
+                            </Typography>
+                        </Box>
                     </Box>
                     
                     {posts.length > 0 ? (
@@ -474,10 +517,14 @@ function Profile() {
                                 minHeight: '300px',
                                 position: 'relative'
                             }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                                    <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px', color: '#3C007D'}}>
-                                        {posts[currentPostIndex]?.title}
-                                    </Typography>
+                                
+                                
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start', mt: 4 }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <Typography level="h3" sx={{fontFamily: 'Montserrat', fontSize: '22px', color: '#3C007D'}}>
+                                            {posts[currentPostIndex]?.title}
+                                        </Typography>
+                                    </Box>
                                     <Button
                                         onClick={() => handleDeletePost(posts[currentPostIndex].id)}
                                         sx={{
@@ -631,7 +678,7 @@ function Profile() {
                 isOpen={isEditProfileOpen} 
                 onClose={() => {
                     setIsEditProfileOpen(false);
-                    updateUserData(); // Обновляем данные после закрытия окна
+                    updateUserData(); // Обновляем днные после закрытия окна
                 }} 
             />
         </Box>
