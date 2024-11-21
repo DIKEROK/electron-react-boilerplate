@@ -119,7 +119,6 @@ function FriendProfile() {
         setCurrentPostIndex(prev => prev - 1);
     };
 
-<<<<<<< HEAD
     const handlePrevFriends = () => {
         setCurrentFriendIndex(prev => Math.max(0, prev - 2));
     };
@@ -128,10 +127,6 @@ function FriendProfile() {
         setCurrentFriendIndex(prev => 
             Math.min(prev + 2, Math.max(0, friends.length - 2))
         );
-=======
-    const handleFriendClick = (friendId: string) => {
-        navigate(`/friend/${friendId}`);
->>>>>>> 131d05ba6f356b37e1bb4c63dd1e219b18b24063
     };
 
     return (
@@ -188,7 +183,6 @@ function FriendProfile() {
                         <Typography level="h2" sx={{fontFamily: 'Montserrat', marginBottom: '20px', fontSize: '30px'}}>
                             Друзья
                         </Typography>
-<<<<<<< HEAD
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative'}}>
                             <Box sx={{
                                 position: 'absolute',
@@ -204,24 +198,6 @@ function FriendProfile() {
                             
                             {friends.slice(currentFriendIndex, currentFriendIndex + 2).map((friend, index) => (
                                 <Box key={index} sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px'}}>
-=======
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                            {friends.map((friend, index) => (
-                                <Box 
-                                    key={index} 
-                                    onClick={() => handleFriendClick(friend.uid!)}
-                                    sx={{
-                                        display: 'flex', 
-                                        flexDirection: 'row', 
-                                        alignItems: 'center', 
-                                        gap: '10px',
-                                        cursor: 'pointer',
-                                        '&:hover': {
-                                            opacity: 0.8
-                                        }
-                                    }}
-                                >
->>>>>>> 131d05ba6f356b37e1bb4c63dd1e219b18b24063
                                     <Avatar 
                                         src={friend.photoURL} 
                                         sx={{

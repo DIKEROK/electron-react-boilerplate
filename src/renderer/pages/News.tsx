@@ -194,14 +194,7 @@ function News() {
                                         opacity: 0.7
                                     }}
                                 >
-<<<<<<< HEAD
-                                    {post.author?.name?.[0]}{post.author?.surname?.[0]}
-                                </Avatar>
-                                <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} onClick={() => handleUserClick(post.userId)} level="h4">
-                                    {post.author?.name} {post.author?.surname}
-=======
                                     {formatDate(post.createdAt)}
->>>>>>> 131d05ba6f356b37e1bb4c63dd1e219b18b24063
                                 </Typography>
                             </Box>
                             
