@@ -19,6 +19,9 @@ interface UserData {
     friends: string[];
     friendRequests: string[];
     email: string;
+    course?: string;
+    college?: string;
+    job?: string;
 }
 
 function Friends() {
@@ -32,6 +35,48 @@ function Friends() {
 
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    const [courseFilter, setCourseFilter] = useState('');
+    const [collegeFilter, setCollegeFilter] = useState('');
+    const [jobFilter, setJobFilter] = useState('');
+
+    const [availableCourses, setAvailableCourses] = useState<string[]>([]);
+    const [availableColleges, setAvailableColleges] = useState<string[]>([]);
+    const [availableJobs, setAvailableJobs] = useState<string[]>([]);
+
+    const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+    const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+    const [showJobDropdown, setShowJobDropdown] = useState(false);
+
+    const fetchFilterOptions = async () => {
+        if (!auth.currentUser) return;
+
+        try {
+            const usersRef = collection(db, "users");
+            const querySnapshot = await getDocs(usersRef);
+            
+            const courses = new Set<string>();
+            const colleges = new Set<string>();
+            const jobs = new Set<string>();
+
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data() as UserData;
+                if (userData.course && userData.course.trim()) courses.add(userData.course);
+                if (userData.college && userData.college.trim()) colleges.add(userData.college);
+                if (userData.job && userData.job.trim()) jobs.add(userData.job);
+            });
+
+            setAvailableCourses(Array.from(courses).sort());
+            setAvailableColleges(Array.from(colleges).sort());
+            setAvailableJobs(Array.from(jobs).sort());
+        } catch (error) {
+            console.error("Ошибка при загрузке опций фильтров:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchFilterOptions();
+    }, [auth.currentUser]);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -65,7 +110,7 @@ function Friends() {
 
     useEffect(() => {
         const searchUsers = async () => {
-            if (!searchEmail.trim() || !auth.currentUser) {
+            if (!auth.currentUser) {
                 setSearchResult([]);
                 return;
             }
@@ -84,7 +129,12 @@ function Friends() {
                         return;
                     }
                     
-                    if (searchTerms.every(term => fullName.includes(term))) {
+                    const matchesCourse = !courseFilter || userData.course === courseFilter;
+                    const matchesCollege = !collegeFilter || userData.college?.toLowerCase().includes(collegeFilter.toLowerCase());
+                    const matchesJob = !jobFilter || userData.job?.toLowerCase().includes(jobFilter.toLowerCase());
+                    const matchesSearch = !searchEmail.trim() || searchTerms.every(term => fullName.includes(term));
+
+                    if (matchesCourse && matchesCollege && matchesJob && matchesSearch) {
                         foundUsers.push({ ...userData, uid: doc.id });
                     }
                 });
@@ -96,7 +146,7 @@ function Friends() {
         };
 
         searchUsers();
-    }, [searchEmail, db, auth.currentUser]);
+    }, [searchEmail, courseFilter, collegeFilter, jobFilter, db, auth.currentUser]);
 
     const sendFriendRequest = async (targetUserId: string) => {
         if (!auth.currentUser) return;
@@ -178,7 +228,7 @@ function Friends() {
             setFriendRequests(updatedRequests);
         } catch (error) {
             console.error("Ошибка при отклонении запроса:", error);
-            setError('Ошибка при отклонении запроса');
+            setError('Ошибка при отклонени запроса');
         }
     };
 
@@ -225,72 +275,18 @@ function Friends() {
                         flexDirection: 'column',
                         gap: '10px',
                     }}>
-                        <Typography sx={{
-                            fontFamily: 'Montserrat',
-                            color: 'white',
-                            background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
-                            padding: '10px 20px',
-                            borderRadius: '30px',
-                            textAlign: 'center',
-                            position: 'relative',
-                            '&::before': {
-                                content: '""',
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                borderRadius: '30px',
-                                boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
-                                width: '100%',
-                                height: '100%',
-                                pointerEvents: 'none'
-                            }
-                        }}>
-                            Курс
-                        </Typography>
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '10px'
-                        }}>
-                            <Typography sx={{
-                                fontFamily: 'Montserrat',
-                                color: 'white',
-                                background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
-                                padding: '10px 20px',
-                                borderRadius: '30px',
-                                textAlign: 'center',
-                                position: 'relative',
-                                '&::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    borderRadius: '30px',
-                                    boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
-                                    width: '100%',
-                                    height: '100%',
-                                    pointerEvents: 'none'
-                                }
-                            }}>
-                                Колледж
-                            </Typography>
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '10px'
-                            }}>
-                                <Typography sx={{
+                        <Box sx={{ position: 'relative' }}>
+                            <Typography 
+                                onClick={() => setShowCourseDropdown(!showCourseDropdown)}
+                                sx={{
                                     fontFamily: 'Montserrat',
                                     color: 'white',
-                                    background: 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                    background: courseFilter ? 'linear-gradient(45deg, #FF00F6, #8400FF)' : 'linear-gradient(45deg, #8400FF, #F3B7FF)',
                                     padding: '10px 20px',
                                     borderRadius: '30px',
                                     textAlign: 'center',
                                     position: 'relative',
+                                    cursor: 'pointer',
                                     '&::before': {
                                         content: '""',
                                         position: 'absolute',
@@ -304,10 +300,180 @@ function Friends() {
                                         height: '100%',
                                         pointerEvents: 'none'
                                     }
+                                }}
+                            >
+                                {courseFilter || 'Курс'}
+                            </Typography>
+                            {showCourseDropdown && (
+                                <Box sx={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: 0,
+                                    right: 0,
+                                    zIndex: 1000,
+                                    backgroundColor: '#F4D9FF',
+                                    borderRadius: '15px',
+                                    marginTop: '5px',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                    border: '2px solid rgba(60, 0, 165, 0.05)',
                                 }}>
-                                    Специальность
-                                </Typography>
-                            </Box>
+                                    {availableCourses.map((course) => (
+                                        <Typography
+                                            key={course}
+                                            onClick={() => {
+                                                setCourseFilter(courseFilter === course ? '' : course);
+                                                setShowCourseDropdown(false);
+                                            }}
+                                            sx={{
+                                                padding: '8px 15px',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Montserrat',
+                                                color: courseFilter === course ? '#8400FF' : 'black',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(132, 0, 255, 0.1)',
+                                                    borderRadius: '15px'
+                                                }
+                                            }}
+                                        >
+                                            {course} курс
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+
+                        <Box sx={{ position: 'relative' }}>
+                            <Typography 
+                                onClick={() => setShowCollegeDropdown(!showCollegeDropdown)}
+                                sx={{
+                                    fontFamily: 'Montserrat',
+                                    color: 'white',
+                                    background: collegeFilter ? 'linear-gradient(45deg, #FF00F6, #8400FF)' : 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                    padding: '10px 20px',
+                                    borderRadius: '30px',
+                                    textAlign: 'center',
+                                    position: 'relative',
+                                    cursor: 'pointer',
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        borderRadius: '30px',
+                                        boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
+                                        width: '100%',
+                                        height: '100%',
+                                        pointerEvents: 'none'
+                                    }
+                                }}
+                            >
+                                {collegeFilter || 'Колледж'}
+                            </Typography>
+                            {showCollegeDropdown && (
+                                <Box sx={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: 0,
+                                    right: 0,
+                                    zIndex: 1000,
+                                    backgroundColor: '#F4D9FF',
+                                    borderRadius: '15px',
+                                    marginTop: '5px',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                    border: '2px solid rgba(60, 0, 165, 0.05)',
+                                }}>
+                                    {availableColleges.map((college) => (
+                                        <Typography
+                                            key={college}
+                                            onClick={() => {
+                                                setCollegeFilter(collegeFilter === college ? '' : college);
+                                                setShowCollegeDropdown(false);
+                                            }}
+                                            sx={{
+                                                padding: '8px 15px',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Montserrat',
+                                                color: collegeFilter === college ? '#8400FF' : 'black',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(132, 0, 255, 0.1)',
+                                                    borderRadius: '15px'
+                                                }
+                                            }}
+                                        >
+                                            {college}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+
+                        <Box sx={{ position: 'relative' }}>
+                            <Typography 
+                                onClick={() => setShowJobDropdown(!showJobDropdown)}
+                                sx={{
+                                    fontFamily: 'Montserrat',
+                                    color: 'white',
+                                    background: jobFilter ? 'linear-gradient(45deg, #FF00F6, #8400FF)' : 'linear-gradient(45deg, #8400FF, #F3B7FF)',
+                                    padding: '10px 20px',
+                                    borderRadius: '30px',
+                                    textAlign: 'center',
+                                    position: 'relative',
+                                    cursor: 'pointer',
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        borderRadius: '30px',
+                                        boxShadow: 'inset 2px 5px 7.7px rgba(255, 255, 255, 0.56)',
+                                        width: '100%',
+                                        height: '100%',
+                                        pointerEvents: 'none'
+                                    }
+                                }}
+                            >
+                                {jobFilter || 'Специальность'}
+                            </Typography>
+                            {showJobDropdown && (
+                                <Box sx={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: 0,
+                                    right: 0,
+                                    zIndex: 1000,
+                                    backgroundColor: '#F4D9FF',
+                                    borderRadius: '15px',
+                                    marginTop: '5px',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                    border: '2px solid rgba(60, 0, 165, 0.05)',
+                                }}>
+                                    {availableJobs.map((job) => (
+                                        <Typography
+                                            key={job}
+                                            onClick={() => {
+                                                setJobFilter(jobFilter === job ? '' : job);
+                                                setShowJobDropdown(false);
+                                            }}
+                                            sx={{
+                                                padding: '8px 15px',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Montserrat',
+                                                color: jobFilter === job ? '#8400FF' : 'black',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(132, 0, 255, 0.1)',
+                                                    borderRadius: '15px'
+                                                }
+                                            }}
+                                        >
+                                            {job}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
                         </Box>
                     </Box>
                 </Box>
@@ -363,7 +529,7 @@ function Friends() {
                         >
                         </Input>
                         
-                        {searchResult.length > 0 && (
+                        {searchEmail.trim() !== '' && searchResult.length > 0 && (
                             <Box sx={{ 
                                 position: 'absolute',
                                 top: '80%',
@@ -423,7 +589,8 @@ function Friends() {
                                                         maskComposite: 'exclude'
                                                     },
                                                     '&:hover': {
-                                                        backgroundColor: 'rgba(132, 0, 255, 0.1)'
+                                                        backgroundColor: 'rgba(132, 0, 255, 0.1)',
+                                                        borderRadius: '15px'
                                                     }
                                                 }}>
                                                     Добавить в друзья
@@ -470,7 +637,8 @@ function Friends() {
                                     backgroundColor: 'rgba(255, 255, 255, 0.3)',
                                     transition: 'background-color 0.2s',
                                     '&:hover': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.5)'
+                                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                        borderRadius: '15px'
                                     }
                                 }}>
                                     <Avatar 
@@ -503,11 +671,12 @@ function Friends() {
                                             marginLeft: 'auto',
                                             padding: '5px 10px',
                                             '&:hover': {
-                                                backgroundColor: 'rgba(255, 0, 0, 0.1)'
+                                                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                                borderRadius: '15px'
                                             }
                                         }}
                                     >
-                                        Удалить
+                                        Удалит
                                     </Button>
                                 </Box>
                             ))}
@@ -578,7 +747,8 @@ function Friends() {
                                                     maskComposite: 'exclude'
                                                 },
                                                 '&:hover': {
-                                                    backgroundColor: 'rgba(132, 0, 255, 0.1)'
+                                                    backgroundColor: 'rgba(132, 0, 255, 0.1)',
+                                                    borderRadius: '15px'
                                                 }
                                             }}>
                                                 Принять
@@ -593,7 +763,8 @@ function Friends() {
                                                 border: '2px solid rgba(255, 0, 0, 0.05)',
                                                 borderRadius: '15px',
                                                 '&:hover': {
-                                                    backgroundColor: 'rgba(255, 0, 0, 0.1)'
+                                                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                                    borderRadius: '15px'
                                                 }
                                             }}>
                                                 Отклонить
