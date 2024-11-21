@@ -1,30 +1,43 @@
-import { Box, Typography, Avatar, Button } from '@mui/joy';
+import { Box, Typography, Avatar, Button, Textarea } from '@mui/joy';
 import { motion } from 'framer-motion';
 import "@fontsource/montserrat";
 import { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, query, where, orderBy, getDocs, getDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, addDoc, onSnapshot } from 'firebase/firestore';
 import { app } from '../firebase';
 import Head from '../components/Head';
 import { useNavigate } from 'react-router-dom';
 
 const TextColor = '#3C007D';
 
-interface Post {
+interface Comment {
     id: string;
     userId: string;
+    content: string;
+    createdAt: string;
+    author?: {
+        name: string;
+        surname: string;
+        photoURL?: string;
+    };
+}
+
+interface Post {
+    id: string;
+    userId: string; 
     title: string;
     content: string;
     imageUrl?: string;
     createdAt: string;
     likes: number;
-    comments: any[];
+    comments: Comment[];
     theme: string;
     author?: {
         name: string;
         surname: string;
         photoURL?: string;
     };
+    commentsUnsubscribe?: () => void;
 }
 
 const POST_THEMES = [
@@ -38,11 +51,11 @@ const POST_THEMES = [
 
 function News() {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [hasFriends, setHasFriends] = useState<boolean | null>(null);
     const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const navigate = useNavigate();
+    const [newComments, setNewComments] = useState<{ [key: string]: string }>({});
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -56,56 +69,64 @@ function News() {
     };
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            if (!auth.currentUser) return;
+        const postsRef = collection(db, "posts");
+        const postsQuery = query(postsRef, orderBy("createdAt", "desc"));
 
-            try {
-                const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        const unsubscribePosts = onSnapshot(postsQuery, async (querySnapshot) => {
+            const allPosts = await Promise.all(querySnapshot.docs.map(async (docSnap) => {
+                const postData = docSnap.data() as Post;
+                const userDoc = await getDoc(doc(db, "users", postData.userId));
                 const userData = userDoc.data();
-                
-                if (!userData?.friends?.length) {
-                    setHasFriends(false);
-                    return;
-                }
-                
-                setHasFriends(true);
 
-                const friendsPosts = await Promise.all(
-                    userData.friends.map(async (friendId: string) => {
-                        const friendPostsQuery = query(
-                            collection(db, "posts"),
-                            where("userId", "==", friendId),
-                            orderBy("createdAt", "desc")
-                        );
-                        
-                        const querySnapshot = await getDocs(friendPostsQuery);
-                        const friendDoc = await getDoc(doc(db, "users", friendId));
-                        const friendData = friendDoc.data();
-                        
-                        return querySnapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data(),
-                            author: {
-                                name: friendData?.name || '',
-                                surname: friendData?.surname || '',
-                                photoURL: friendData?.photoURL
-                            }
-                        } as Post));
-                    })
-                );
+                // Слушатель комментариев для каждого поста
+                const commentsRef = collection(db, "posts", docSnap.id, "comments");
+                const unsubscribeComments = onSnapshot(commentsRef, (commentsSnapshot) => {
+                    const comments: Comment[] = commentsSnapshot.docs.map(commentDoc => ({
+                        id: commentDoc.id,
+                        ...commentDoc.data()
+                    } as Comment));
 
-                const allPosts = friendsPosts
-                    .flat()
-                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                    setPosts(prevPosts => prevPosts.map(post => {
+                        if (post.id === docSnap.id) {
+                            return {
+                                ...post,
+                                comments,
+                                author: {
+                                    name: userData?.name || '',
+                                    surname: userData?.surname || '',
+                                    photoURL: userData?.photoURL
+                                }
+                            };
+                        }
+                        return post;
+                    }));
+                });
 
-                setPosts(allPosts);
-            } catch (error) {
-                console.error("Ошибка при загрузке постов:", error);
-            }
+                return {
+                    id: docSnap.id,
+                    ...postData,
+                    comments: [], // Изначально пусто, будет обновлено слушателем
+                    author: {
+                        name: userData?.name || '',
+                        surname: userData?.surname || '',
+                        photoURL: userData?.photoURL
+                    },
+                    commentsUnsubscribe: unsubscribeComments
+                } as Post;
+            }));
+
+            setPosts(allPosts);
+        });
+
+        // Очистка слушателей при размонтировании компонента
+        return () => {
+            unsubscribePosts();
+            // Также нужно очистить все слушатели комментариев
+            posts.forEach(post => {
+                if (post.commentsUnsubscribe) post.commentsUnsubscribe();
+            });
         };
-
-        fetchPosts();
-    }, [auth.currentUser]);
+    }, []);
 
     const handleUserClick = (userId: string) => {
         navigate(`/friend/${userId}`);
@@ -114,6 +135,39 @@ function News() {
     const filteredPosts = selectedTheme 
         ? posts.filter(post => post.theme === selectedTheme)
         : posts;
+
+    const handleCommentChange = (postId: string, value: string) => {
+        setNewComments(prev => ({ ...prev, [postId]: value }));
+    };
+
+    const handleAddComment = async (postId: string) => {
+        if (!auth.currentUser) return;
+        const commentContent = newComments[postId]?.trim();
+        if (!commentContent) return;
+
+        try {
+            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const userData = userDoc.data();
+
+            const commentRef = collection(db, "posts", postId, "comments");
+            const newComment = {
+                userId: auth.currentUser.uid,
+                content: commentContent,
+                createdAt: new Date().toISOString(),
+                author: {
+                    name: userData?.name || '',
+                    surname: userData?.surname || '',
+                    photoURL: userData?.photoURL || ''
+                }
+            };
+            await addDoc(commentRef, newComment);
+
+            // Очистка поля ввода комментария
+            setNewComments(prev => ({ ...prev, [postId]: '' }));
+        } catch (error) {
+            console.error("Ошибка при добавлении комментария:", error);
+        }
+    };
 
     return (
         <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} transition={{duration: 0.6}}>
@@ -159,25 +213,7 @@ function News() {
                 ))}
             </Box>
 
-            {hasFriends === false ? (
-                <Box sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: '200px'
-                }}>
-                    <Typography 
-                        level="h3" 
-                        sx={{
-                            fontFamily: 'Montserrat', 
-                            color: TextColor,
-                            textAlign: 'center'
-                        }}
-                    >
-                        Вы пока не подписаны ни на одного друга!
-                    </Typography>
-                </Box>
-            ) : filteredPosts.length === 0 ? (
+            {filteredPosts.length === 0 ? (
                 <Box sx={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -236,7 +272,7 @@ function News() {
                                     >
                                         {post.author?.name?.[0]}{post.author?.surname?.[0]}
                                     </Avatar>
-                                    <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} onClick={() => handleUserClick(post.userId)} level="h4">
+                                    <Typography sx={{cursor: 'pointer', fontFamily: 'Montserrat', color: TextColor}} level="h4" onClick={() => handleUserClick(post.userId)}>
                                         {post.author?.name} {post.author?.surname}
                                     </Typography>
                                 </Box>
@@ -295,6 +331,63 @@ function News() {
                             <Typography sx={{fontFamily: 'Montserrat', color: TextColor}}>
                                 {post.content}
                             </Typography>
+
+                            {/* Раздел комментариев */}
+                            <Box sx={{ marginTop: '20px' }}>
+                                <Typography level="h4" sx={{ fontFamily: 'Montserrat', color: TextColor, marginBottom: '10px' }}>
+                                    Комментарии
+                                </Typography>
+                                {post.comments.map(comment => (
+                                    <Box key={comment.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, marginBottom: '10px' }}>
+                                        <Avatar 
+                                            src={comment.author?.photoURL}
+                                            sx={{
+                                                width: 40,
+                                                height: 40,
+                                                cursor: 'pointer'
+                                            }}
+                                            onClick={() => handleUserClick(comment.userId)}
+                                        >
+                                            {comment.author?.name?.[0]}{comment.author?.surname?.[0]}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography sx={{ fontFamily: 'Montserrat', color: TextColor, fontWeight: 'bold' }}>
+                                                {comment.author?.name} {comment.author?.surname}
+                                            </Typography>
+                                            <Typography sx={{ fontFamily: 'Montserrat', color: TextColor }}>
+                                                {comment.content}
+                                            </Typography>
+                                            <Typography sx={{ fontFamily: 'Montserrat', color: TextColor, fontSize: '12px', opacity: 0.7 }}>
+                                                {formatDate(comment.createdAt)}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                ))}
+
+                                {/* Поле для добавления нового комментария */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: '10px' }}>
+                                    <Avatar 
+                                        src={auth.currentUser?.photoURL || ''}
+                                        sx={{
+                                            width: 40,
+                                            height: 40,
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => handleUserClick(auth.currentUser!.uid)}
+                                    >
+                                        {auth.currentUser?.displayName?.[0] || 'U'}
+                                    </Avatar>
+                                    <Textarea
+                                        placeholder="Добавьте комментарий..."
+                                        value={newComments[post.id] || ''}
+                                        onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                                        sx={{ flex: 1, fontFamily: 'Montserrat' }}
+                                    />
+                                    <Button onClick={() => handleAddComment(post.id)} sx={{ fontFamily: 'Montserrat' }}>
+                                        Отправить
+                                    </Button>
+                                </Box>
+                            </Box>
                         </Box>
                     ))}
                 </Box>
